@@ -14,22 +14,48 @@ This blueprint uses **EKS Auto Mode** for automatic GPU node provisioning. When 
 
 ## Understanding the GPU Memory Requirements
 
-Deploying Llama 4 models requires careful memory planning. Llama 4 uses a Mixture of Experts (MoE) architecture. Below are the memory requirements for different model variants:
+Deploying Llama 4 models requires careful memory planning. Llama 4 uses a Mixture of Experts (MoE) architecture where all expert weights must be loaded into GPU memory, even though only a subset of experts are activated per token.
 
-| Model | Active Parameters | Total Parameters | BF16 Memory | Recommended GPU | tensor_parallel_size |
-|-------|-------------------|------------------|-------------|-----------------|---------------------|
-| Llama 4 Scout (17B-16E) | 17B | ~109B | ~220 GiB | 8x A10G or 4x A100 (80GB) | 8 or 4 |
+### Model Memory Requirements
+
+| Model | Active Params | Total Params | BF16 Memory | Min GPU Config | tensor_parallel_size |
+|-------|---------------|--------------|-------------|----------------|---------------------|
+| Llama 4 Scout (17B-16E) | 17B | ~109B | ~220 GiB | 8x A100 (40GB) | 8 |
 | Llama 4 Maverick (17B-128E) | 17B | ~400B | ~800 GiB | 8x H100 (80GB) | 8 |
 
-Using vLLM with `gpu-memory-utilization=0.9`, we optimize memory usage while preventing out-of-memory (OOM) crashes.
+### EC2 Instance Selection Guide
 
-**Expected log output during model loading:**
+:::danger
+Llama 4 Scout requires **at least 220GB of GPU memory**. Common GPU instances like g5.48xlarge (8x A10G = 192GB) will fail with CUDA Out of Memory errors.
+:::
 
-```log
-INFO model_runner.py:1115] Loading model weights took 14.99 GiB
-INFO worker.py:266] vLLM instance can use total GPU memory (22.30 GiB) x utilization (0.90) = 20.07 GiB
-INFO worker.py:266] Model weights: 14.99 GiB | Activation memory: 0.85 GiB | KV Cache: 4.17 GiB
+| Instance Type | GPU | GPU Memory | Total VRAM | Scout (220GB) | Maverick (800GB) | Cost/hr |
+|--------------|-----|------------|------------|---------------|------------------|---------|
+| g5.48xlarge | 8x A10G | 24GB each | 192GB | ❌ Insufficient | ❌ Insufficient | ~$16 |
+| p4d.24xlarge | 8x A100 | 40GB each | 320GB | ✅ Supported | ❌ Insufficient | ~$32 |
+| p4de.24xlarge | 8x A100 | 80GB each | 640GB | ✅ Recommended | ❌ Insufficient | ~$40 |
+| p5.48xlarge | 8x H100 | 80GB each | 640GB | ✅ Recommended | ✅ Supported | ~$98 |
+
+### Why MoE Models Need More Memory
+
+Unlike dense models where memory ≈ 2 × parameters (for BF16), MoE models load **all expert weights** into memory:
+
 ```
+Scout Memory = Base Model + (16 experts × expert_size) ≈ 220GB
+Maverick Memory = Base Model + (128 experts × expert_size) ≈ 800GB
+```
+
+Even though only 1-2 experts are activated per token during inference, all experts must reside in GPU memory for fast routing.
+
+### Memory Optimization Options
+
+If you need to run on smaller GPUs, consider these alternatives:
+
+1. **AWQ Quantization** (4-bit): Reduces memory by ~4x, but may have compatibility issues with vLLM for MoE models
+2. **Smaller Models**: Use Llama 3.1 8B/70B which have more predictable memory requirements
+3. **Pipeline Parallelism**: Split model across multiple nodes (requires LeaderWorkerSet)
+
+Using vLLM with `gpu-memory-utilization=0.9`, we optimize memory usage while preventing out-of-memory (OOM) crashes.
 
 
 <CollapsibleContent header={<h2><span>Prerequisites and EKS Cluster Setup</span></h2>}>

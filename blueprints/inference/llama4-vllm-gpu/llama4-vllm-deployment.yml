@@ -1,7 +1,12 @@
 # Llama 4 Scout vLLM Deployment for EKS Auto Mode
 # This manifest deploys Llama 4 Scout 17B-16E model using vLLM inference engine
 # Prerequisites: EKS cluster >= 1.30 with Auto Mode enabled
-# Hardware: Requires 8x A10G GPUs or 4x A100 (80GB) GPUs
+#
+# IMPORTANT: GPU Memory Requirements
+# - Llama 4 Scout requires ~220GB GPU memory (MoE architecture loads all 16 experts)
+# - g5.48xlarge (8x A10G = 192GB) is NOT sufficient - will cause OOM errors
+# - Minimum: p4d.24xlarge (8x A100 40GB = 320GB)
+# - Recommended: p4de.24xlarge or p5.48xlarge (8x 80GB GPUs = 640GB)
 #
 # Usage:
 #   export HUGGING_FACE_HUB_TOKEN=$(echo -n "your-hf-token" | base64)
@@ -84,11 +89,11 @@ spec:
           limits:
             nvidia.com/gpu: 8
             cpu: "96"
-            memory: "480Gi"
+            memory: "400Gi"
           requests:
             nvidia.com/gpu: 8
-            cpu: "64"
-            memory: "320Gi"
+            cpu: "48"
+            memory: "200Gi"
         volumeMounts:
         - name: shm
           mountPath: /dev/shm
@@ -98,7 +103,7 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 600
+          initialDelaySeconds: 900
           periodSeconds: 30
           timeoutSeconds: 10
           failureThreshold: 5
@@ -106,7 +111,7 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 300
+          initialDelaySeconds: 600
           periodSeconds: 15
           timeoutSeconds: 10
           failureThreshold: 5
@@ -118,9 +123,11 @@ spec:
       - name: cache
         emptyDir:
           sizeLimit: 300Gi
-      # EKS Auto Mode: GPU node auto-provisioning
+      # EKS Auto Mode: Force p4d/p5 instance for sufficient GPU memory
+      # Scout model requires ~220GB, only p4d.24xlarge (320GB) or p5.48xlarge (640GB) will work
       nodeSelector:
         eks.amazonaws.com/compute-type: auto
+        eks.amazonaws.com/instance-category: p
       tolerations:
       - key: "nvidia.com/gpu"
         operator: "Exists"

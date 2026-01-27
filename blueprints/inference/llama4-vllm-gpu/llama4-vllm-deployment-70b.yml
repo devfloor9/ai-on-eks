@@ -1,7 +1,12 @@
 # Llama 4 Maverick vLLM Deployment for EKS Auto Mode (Multi-GPU)
 # This manifest deploys Llama 4 Maverick 17B-128E model using vLLM with tensor parallelism
 # Prerequisites: EKS cluster >= 1.30 with Auto Mode enabled
-# Hardware: Requires 8x A10G GPUs or 2x A100 (80GB) GPUs
+#
+# IMPORTANT: GPU Memory Requirements
+# - Llama 4 Maverick requires ~800GB GPU memory (MoE architecture loads all 128 experts)
+# - p4d.24xlarge (320GB) and p4de.24xlarge (640GB) are NOT sufficient
+# - Minimum: p5.48xlarge (8x H100 80GB = 640GB) with reduced context length
+# - Recommended: Multiple p5.48xlarge nodes with pipeline parallelism
 #
 # Usage:
 #   export HUGGING_FACE_HUB_TOKEN=$(echo -n "your-hf-token" | base64)
