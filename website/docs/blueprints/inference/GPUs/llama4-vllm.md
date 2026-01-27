@@ -77,7 +77,69 @@ aws eks describe-cluster --name <cluster-name> --query 'cluster.computeConfig.en
 true
 ```
 
-**Step 3:** Verify NVIDIA Device Plugin (Auto Mode manages this automatically)
+**Step 3:** Verify GPU NodePool exists
+
+EKS Auto Mode requires a GPU NodePool to provision GPU instances. Check if a GPU NodePool exists:
+
+```bash
+kubectl get nodepools
+```
+
+```text
+NAME              AGE
+general-purpose   10m
+gpu               5m
+system            10m
+```
+
+If you don't see a `gpu` NodePool, create one:
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: gpu
+spec:
+  disruption:
+    budgets:
+      - nodes: 10%
+    consolidateAfter: 30s
+    consolidationPolicy: WhenEmptyOrUnderutilized
+  template:
+    spec:
+      expireAfter: 336h
+      nodeClassRef:
+        group: eks.amazonaws.com
+        kind: NodeClass
+        name: default
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: eks.amazonaws.com/instance-category
+          operator: In
+          values: ["g", "p"]
+        - key: eks.amazonaws.com/instance-generation
+          operator: Gt
+          values: ["4"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+      taints:
+        - key: nvidia.com/gpu
+          effect: NoSchedule
+EOF
+```
+
+:::info
+The default `general-purpose` NodePool only supports CPU instance categories (c, m, r). GPU instances (g, p categories) require a dedicated GPU NodePool.
+:::
+
+**Step 4:** Verify NVIDIA Device Plugin (Auto Mode manages this automatically)
 
 ```bash
 kubectl get daemonset -n kube-system | grep nvidia
