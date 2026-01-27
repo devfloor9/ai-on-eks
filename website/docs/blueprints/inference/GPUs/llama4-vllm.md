@@ -1,0 +1,421 @@
+---
+title: Llama 4 with vLLM on EKS
+sidebar_position: 6
+---
+import CollapsibleContent from '../../../../src/components/CollapsibleContent';
+
+# Llama 4 with vLLM on Amazon EKS
+
+In this guide, we'll explore deploying [Llama 4](https://huggingface.co/meta-llama) models using [vLLM](https://github.com/vllm-project/vllm) inference engine on [Amazon EKS](https://aws.amazon.com/eks/) with EKS Auto Mode for automatic GPU node provisioning.
+
+:::info
+This blueprint uses **EKS Auto Mode** for automatic GPU node provisioning. When you deploy a GPU workload, EKS automatically provisions the appropriate GPU nodes without requiring Karpenter or manual node group configuration.
+:::
+
+## Understanding the GPU Memory Requirements
+
+Deploying Llama 4 models requires careful memory planning. Each model parameter typically consumes 2 bytes (`BF16` precision). Below are the memory requirements for different model variants:
+
+| Model | Parameters | BF16 Memory | Recommended GPU | tensor_parallel_size |
+|-------|------------|-------------|-----------------|---------------------|
+| Llama 4 8B | 8B | ~16 GiB | A10G (24GB), L4 (24GB) | 1 |
+| Llama 4 70B | 70B | ~140 GiB | 8x A10G or 2x A100 (80GB) | 8 or 2 |
+
+Using vLLM with `gpu-memory-utilization=0.9`, we optimize memory usage while preventing out-of-memory (OOM) crashes.
+
+**Expected log output during model loading:**
+
+```log
+INFO model_runner.py:1115] Loading model weights took 14.99 GiB
+INFO worker.py:266] vLLM instance can use total GPU memory (22.30 GiB) x utilization (0.90) = 20.07 GiB
+INFO worker.py:266] Model weights: 14.99 GiB | Activation memory: 0.85 GiB | KV Cache: 4.17 GiB
+```
+
+
+<CollapsibleContent header={<h2><span>Prerequisites and EKS Cluster Setup</span></h2>}>
+
+### Prerequisites
+
+Before deploying Llama 4, ensure you have the following tools installed:
+
+:::info
+To simplify the demo process, we assume the use of an IAM role with administrative privileges. For production deployments, create an IAM role with only the necessary permissions using tools like [IAM Access Analyzer](https://aws.amazon.com/iam/access-analyzer/).
+:::
+
+1. [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+2. [kubectl](https://kubernetes.io/docs/tasks/tools/)
+3. [envsubst](https://pypi.org/project/envsubst/)
+
+### EKS Cluster Requirements
+
+This blueprint requires an existing EKS cluster with the following configuration:
+
+- **EKS Version**: >= 1.30
+- **EKS Auto Mode**: Enabled (for automatic GPU node provisioning)
+- **NVIDIA Device Plugin**: Automatically managed by EKS Auto Mode
+
+### Verify EKS Cluster Environment
+
+**Step 1:** Check EKS cluster version
+
+```bash
+kubectl version --short
+```
+
+```text
+Client Version: v1.30.0
+Server Version: v1.30.0-eks-xxxxx
+```
+
+**Step 2:** Verify EKS Auto Mode is enabled
+
+```bash
+aws eks describe-cluster --name <cluster-name> --query 'cluster.computeConfig.enabled'
+```
+
+```text
+true
+```
+
+**Step 3:** Verify NVIDIA Device Plugin (Auto Mode manages this automatically)
+
+```bash
+kubectl get daemonset -n kube-system | grep nvidia
+```
+
+If EKS Auto Mode is enabled, the NVIDIA device plugin is automatically deployed when GPU workloads are scheduled.
+
+</CollapsibleContent>
+
+## Deploying Llama 4 8B with vLLM
+
+With the EKS cluster ready, we can now deploy Llama 4 8B using vLLM.
+
+:::caution
+The use of [Llama 4](https://huggingface.co/meta-llama) models requires access through a Hugging Face account. Make sure you have accepted the model license on HuggingFace.
+:::
+
+**Step 1:** Export the Hugging Face Hub Token
+
+Create a Hugging Face account and generate an access token:
+1. Navigate to [Hugging Face Settings → Access Tokens](https://huggingface.co/settings/tokens)
+2. Create a new token with read permissions
+3. Export the token as a base64-encoded environment variable:
+
+```bash
+export HUGGING_FACE_HUB_TOKEN=$(echo -n "Your-Hugging-Face-Hub-Token-Value" | base64)
+```
+
+**Step 2:** Clone the repository
+
+```bash
+git clone https://github.com/awslabs/ai-on-eks.git
+cd ai-on-eks
+```
+
+**Step 3:** Deploy the vLLM service
+
+```bash
+cd blueprints/inference/llama4-vllm-gpu/
+envsubst < llama4-vllm-deployment.yml | kubectl apply -f -
+```
+
+**Output:**
+
+```text
+namespace/llama4-vllm created
+secret/hf-token created
+deployment.apps/llama4-vllm created
+service/llama4-vllm-svc created
+```
+
+**Step 4:** Monitor the deployment
+
+```bash
+kubectl get pods -n llama4-vllm -w
+```
+
+:::info
+The first deployment may take 10-15 minutes as EKS Auto Mode provisions a GPU node and the model weights are downloaded from HuggingFace.
+:::
+
+```text
+NAME                           READY   STATUS    RESTARTS   AGE
+llama4-vllm-xxxxxxxxx-xxxxx    1/1     Running   0          10m
+```
+
+**Step 5:** Verify the service
+
+```bash
+kubectl get svc -n llama4-vllm
+```
+
+```text
+NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+llama4-vllm-svc   ClusterIP   172.20.xxx.xx   <none>        8000/TCP   10m
+```
+
+
+## Testing the Llama 4 Model
+
+Now it's time to test the Llama 4 chat model.
+
+**Step 1:** Port-forward the vLLM service
+
+```bash
+kubectl -n llama4-vllm port-forward svc/llama4-vllm-svc 8000:8000
+```
+
+**Step 2:** Test the /v1/models endpoint
+
+```bash
+curl http://localhost:8000/v1/models
+```
+
+**Response:**
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "meta-llama/Llama-4-8B-Instruct",
+      "object": "model",
+      "created": 1234567890,
+      "owned_by": "vllm"
+    }
+  ]
+}
+```
+
+**Step 3:** Test chat completion
+
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "meta-llama/Llama-4-8B-Instruct",
+    "messages": [{"role": "user", "content": "Explain what Amazon EKS is in 2 sentences."}],
+    "max_tokens": 100,
+    "stream": false
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "id": "chatcmpl-xxxxx",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "meta-llama/Llama-4-8B-Instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Amazon Elastic Kubernetes Service (EKS) is a managed container orchestration service that makes it easy to run Kubernetes on AWS without needing to install and operate your own Kubernetes control plane. It automatically manages the availability and scalability of the Kubernetes control plane nodes, handles upgrades, and integrates with other AWS services for security, networking, and monitoring."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 75,
+    "total_tokens": 90
+  }
+}
+```
+
+**Step 4:** Test streaming response
+
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "meta-llama/Llama-4-8B-Instruct",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": true
+  }'
+```
+
+## Deploy Open WebUI
+
+Now, let's deploy Open WebUI, which provides a ChatGPT-style chat interface to interact with the Llama 4 model.
+
+**Step 1:** Deploy Open WebUI
+
+```bash
+cd ai-on-eks/blueprints/inference/llama4-vllm-gpu/
+kubectl apply -f open-webui.yaml
+```
+
+**Output:**
+
+```text
+namespace/open-webui created
+deployment.apps/open-webui created
+service/open-webui created
+```
+
+**Step 2:** Verify the deployment
+
+```bash
+kubectl get pods -n open-webui
+```
+
+```text
+NAME                          READY   STATUS    RESTARTS   AGE
+open-webui-xxxxxxxxx-xxxxx    1/1     Running   0          2m
+```
+
+**Step 3:** Access the Open WebUI
+
+```bash
+kubectl -n open-webui port-forward svc/open-webui 8080:80
+```
+
+Open your browser and navigate to [http://localhost:8080](http://localhost:8080)
+
+**Step 4:** Register and start chatting
+
+1. Sign up with your name, email, and password
+2. Click "New Chat"
+3. Select the Llama 4 model from the dropdown
+4. Start chatting!
+
+
+## Monitoring and Observability
+
+### Check vLLM Pod Logs
+
+Monitor the vLLM server logs to check model loading status and inference metrics:
+
+```bash
+kubectl logs -n llama4-vllm -l app=llama4-vllm -f
+```
+
+**Key metrics to watch in logs:**
+
+- **Token throughput**: `Avg prompt throughput: X tokens/s, Avg generation throughput: Y tokens/s`
+- **GPU KV Cache utilization**: `GPU KV cache usage: X%`
+- **Request processing**: `Received request` and `Finished request` entries
+
+### Check GPU Utilization
+
+If you have NVIDIA DCGM Exporter or similar monitoring tools deployed:
+
+```bash
+# Check GPU memory usage on the node
+kubectl exec -n llama4-vllm -it $(kubectl get pods -n llama4-vllm -l app=llama4-vllm -o jsonpath='{.items[0].metadata.name}') -- nvidia-smi
+```
+
+**Expected output:**
+
+```text
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 535.xx.xx    Driver Version: 535.xx.xx    CUDA Version: 12.x     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  NVIDIA A10G         On   | 00000000:00:1E.0 Off |                    0 |
+|  0%   45C    P0    70W / 300W |  18000MiB / 24576MiB |     25%      Default |
++-------------------------------+----------------------+----------------------+
+```
+
+### Performance Metrics
+
+vLLM provides built-in metrics at the `/metrics` endpoint:
+
+```bash
+curl http://localhost:8000/metrics
+```
+
+Key metrics include:
+- `vllm:num_requests_running` - Number of requests currently being processed
+- `vllm:num_requests_waiting` - Number of requests waiting in queue
+- `vllm:gpu_cache_usage_perc` - GPU KV cache utilization percentage
+- `vllm:avg_generation_throughput_toks_per_s` - Average token generation throughput
+
+
+## Deploying Llama 4 70B (Multi-GPU)
+
+For the larger 70B model, you need multiple GPUs with tensor parallelism.
+
+:::danger
+Important: Deploying Llama 4 70B requires 8x A10G GPUs or 2x A100 (80GB) GPUs. This can be expensive. Ensure you monitor your usage carefully.
+:::
+
+**Step 1:** Deploy the 70B model
+
+```bash
+cd ai-on-eks/blueprints/inference/llama4-vllm-gpu/
+envsubst < llama4-vllm-deployment-70b.yml | kubectl apply -f -
+```
+
+**Step 2:** Monitor the deployment
+
+```bash
+kubectl get pods -n llama4-vllm -l model=llama4-70b -w
+```
+
+:::info
+The 70B model deployment may take 20-30 minutes due to larger model weights download and multi-GPU initialization.
+:::
+
+**Step 3:** Test the 70B model
+
+```bash
+kubectl -n llama4-vllm port-forward svc/llama4-vllm-70b-svc 8001:8000
+```
+
+```bash
+curl -X POST http://localhost:8001/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "meta-llama/Llama-4-70B-Instruct",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+## Cleanup
+
+To remove all deployed resources:
+
+**Step 1:** Delete Open WebUI
+
+```bash
+kubectl delete -f open-webui.yaml
+```
+
+**Step 2:** Delete Llama 4 vLLM deployment
+
+```bash
+kubectl delete -f llama4-vllm-deployment.yml
+# Or for 70B model:
+kubectl delete -f llama4-vllm-deployment-70b.yml
+```
+
+**Step 3:** Delete namespaces (optional)
+
+```bash
+kubectl delete namespace llama4-vllm
+kubectl delete namespace open-webui
+```
+
+:::info
+After deleting the GPU workloads, EKS Auto Mode will automatically terminate idle GPU nodes to reduce costs.
+:::
+
+## Key Takeaways
+
+1. **EKS Auto Mode Simplifies GPU Provisioning**: No need to configure Karpenter or manage node groups manually.
+
+2. **vLLM Provides High Performance**: Optimized memory management with PagedAttention enables efficient inference.
+
+3. **OpenAI-Compatible API**: Easy integration with existing tools and applications.
+
+4. **Scalable Architecture**: Support for both single-GPU (8B) and multi-GPU (70B) deployments.
+
+5. **Cost Optimization**: EKS Auto Mode automatically terminates idle GPU nodes.
