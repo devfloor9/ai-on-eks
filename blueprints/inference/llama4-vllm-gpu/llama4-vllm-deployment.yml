@@ -1,5 +1,5 @@
-# Llama 4 8B vLLM Deployment for EKS Auto Mode
-# This manifest deploys Llama 4 8B model using vLLM inference engine
+# Llama 3.1 8B vLLM Deployment for EKS Auto Mode
+# This manifest deploys Llama 3.1 8B model using vLLM inference engine
 # Prerequisites: EKS cluster >= 1.30 with Auto Mode enabled
 #
 # Usage:
@@ -65,7 +65,7 @@ spec:
               key: hf-token
         args:
         - "--model"
-        - "meta-llama/Llama-4-8B-Instruct"
+        - "meta-llama/Llama-3.1-8B-Instruct"
         - "--tensor-parallel-size"
         - "1"
         - "--max-model-len"
