@@ -1,6 +1,7 @@
-# Llama 3.1 8B vLLM Deployment for EKS Auto Mode
-# This manifest deploys Llama 3.1 8B model using vLLM inference engine
+# Llama 4 Scout vLLM Deployment for EKS Auto Mode
+# This manifest deploys Llama 4 Scout 17B-16E model using vLLM inference engine
 # Prerequisites: EKS cluster >= 1.30 with Auto Mode enabled
+# Hardware: Requires 8x A10G GPUs or 4x A100 (80GB) GPUs
 #
 # Usage:
 #   export HUGGING_FACE_HUB_TOKEN=$(echo -n "your-hf-token" | base64)
@@ -37,7 +38,7 @@ metadata:
     app: llama4-vllm
     app.kubernetes.io/name: llama4-vllm
     app.kubernetes.io/component: inference
-    model: llama4-8b
+    model: llama4-scout
 spec:
   replicas: 1
   selector:
@@ -47,7 +48,7 @@ spec:
     metadata:
       labels:
         app: llama4-vllm
-        model: llama4-8b
+        model: llama4-scout
     spec:
       containers:
       - name: vllm
@@ -65,9 +66,9 @@ spec:
               key: hf-token
         args:
         - "--model"
-        - "meta-llama/Llama-3.1-8B-Instruct"
+        - "meta-llama/Llama-4-Scout-17B-16E-Instruct"
         - "--tensor-parallel-size"
-        - "1"
+        - "8"
         - "--max-model-len"
         - "8192"
         - "--gpu-memory-utilization"
@@ -81,13 +82,13 @@ spec:
         - "8000"
         resources:
           limits:
-            nvidia.com/gpu: 1
-            cpu: "12"
-            memory: "60Gi"
+            nvidia.com/gpu: 8
+            cpu: "96"
+            memory: "480Gi"
           requests:
-            nvidia.com/gpu: 1
-            cpu: "8"
-            memory: "40Gi"
+            nvidia.com/gpu: 8
+            cpu: "64"
+            memory: "320Gi"
         volumeMounts:
         - name: shm
           mountPath: /dev/shm
@@ -97,26 +98,26 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 300
+          initialDelaySeconds: 600
           periodSeconds: 30
           timeoutSeconds: 10
-          failureThreshold: 3
+          failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 120
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
+          initialDelaySeconds: 300
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 5
       volumes:
       - name: shm
         emptyDir:
           medium: Memory
-          sizeLimit: 16Gi
+          sizeLimit: 64Gi
       - name: cache
         emptyDir:
-          sizeLimit: 100Gi
+          sizeLimit: 300Gi
       # EKS Auto Mode: GPU node auto-provisioning
       nodeSelector:
         eks.amazonaws.com/compute-type: auto
@@ -124,7 +125,7 @@ spec:
       - key: "nvidia.com/gpu"
         operator: "Exists"
         effect: "NoSchedule"
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 120
 
 ---
 apiVersion: v1

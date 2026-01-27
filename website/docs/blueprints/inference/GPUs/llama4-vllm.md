@@ -1,12 +1,12 @@
 ---
-title: Llama 3.1 with vLLM on EKS
+title: Llama 4 with vLLM on EKS
 sidebar_position: 6
 ---
 import CollapsibleContent from '../../../../src/components/CollapsibleContent';
 
-# Llama 3.1 with vLLM on Amazon EKS
+# Llama 4 with vLLM on Amazon EKS
 
-In this guide, we'll explore deploying [Llama 3.1](https://huggingface.co/meta-llama) models using [vLLM](https://github.com/vllm-project/vllm) inference engine on [Amazon EKS](https://aws.amazon.com/eks/) with EKS Auto Mode for automatic GPU node provisioning.
+In this guide, we'll explore deploying [Llama 4](https://huggingface.co/meta-llama) models using [vLLM](https://github.com/vllm-project/vllm) inference engine on [Amazon EKS](https://aws.amazon.com/eks/) with EKS Auto Mode for automatic GPU node provisioning.
 
 :::info
 This blueprint uses **EKS Auto Mode** for automatic GPU node provisioning. When you deploy a GPU workload, EKS automatically provisions the appropriate GPU nodes without requiring Karpenter or manual node group configuration.
@@ -14,12 +14,12 @@ This blueprint uses **EKS Auto Mode** for automatic GPU node provisioning. When 
 
 ## Understanding the GPU Memory Requirements
 
-Deploying Llama 3.1 models requires careful memory planning. Each model parameter typically consumes 2 bytes (`BF16` precision). Below are the memory requirements for different model variants:
+Deploying Llama 4 models requires careful memory planning. Llama 4 uses a Mixture of Experts (MoE) architecture. Below are the memory requirements for different model variants:
 
-| Model | Parameters | BF16 Memory | Recommended GPU | tensor_parallel_size |
-|-------|------------|-------------|-----------------|---------------------|
-| Llama 3.1 8B | 8B | ~16 GiB | A10G (24GB), L4 (24GB) | 1 |
-| Llama 3.1 70B | 70B | ~140 GiB | 8x A10G or 2x A100 (80GB) | 8 or 2 |
+| Model | Active Parameters | Total Parameters | BF16 Memory | Recommended GPU | tensor_parallel_size |
+|-------|-------------------|------------------|-------------|-----------------|---------------------|
+| Llama 4 Scout (17B-16E) | 17B | ~109B | ~220 GiB | 8x A10G or 4x A100 (80GB) | 8 or 4 |
+| Llama 4 Maverick (17B-128E) | 17B | ~400B | ~800 GiB | 8x H100 (80GB) | 8 |
 
 Using vLLM with `gpu-memory-utilization=0.9`, we optimize memory usage while preventing out-of-memory (OOM) crashes.
 
@@ -149,12 +149,12 @@ If EKS Auto Mode is enabled, the NVIDIA device plugin is automatically deployed 
 
 </CollapsibleContent>
 
-## Deploying Llama 3.1 8B with vLLM
+## Deploying Llama 4 Scout with vLLM
 
-With the EKS cluster ready, we can now deploy Llama 3.1 8B using vLLM.
+With the EKS cluster ready, we can now deploy Llama 4 Scout using vLLM.
 
 :::caution
-The use of [Llama 3.1](https://huggingface.co/meta-llama) models requires access through a Hugging Face account. Make sure you have accepted the model license on HuggingFace.
+The use of [Llama 4](https://huggingface.co/meta-llama) models requires access through a Hugging Face account. Make sure you have accepted the model license on HuggingFace.
 :::
 
 **Step 1:** Export the Hugging Face Hub Token
@@ -218,9 +218,9 @@ llama4-vllm-svc   ClusterIP   172.20.xxx.xx   <none>        8000/TCP   10m
 ```
 
 
-## Testing the Llama 3.1 Model
+## Testing the Llama 4 Model
 
-Now it's time to test the Llama 3.1 chat model.
+Now it's time to test the Llama 4 chat model.
 
 **Step 1:** Port-forward the vLLM service
 
@@ -241,7 +241,7 @@ curl http://localhost:8000/v1/models
   "object": "list",
   "data": [
     {
-      "id": "meta-llama/Llama-3.1-8B-Instruct",
+      "id": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
       "object": "model",
       "created": 1234567890,
       "owned_by": "vllm"
@@ -256,7 +256,7 @@ curl http://localhost:8000/v1/models
 curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     "messages": [{"role": "user", "content": "Explain what Amazon EKS is in 2 sentences."}],
     "max_tokens": 100,
     "stream": false
@@ -270,7 +270,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
   "id": "chatcmpl-xxxxx",
   "object": "chat.completion",
   "created": 1234567890,
-  "model": "meta-llama/Llama-3.1-8B-Instruct",
+  "model": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
   "choices": [
     {
       "index": 0,
@@ -295,7 +295,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     "messages": [{"role": "user", "content": "Hello!"}],
     "stream": true
   }'
@@ -303,7 +303,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ## Deploy Open WebUI
 
-Now, let's deploy Open WebUI, which provides a ChatGPT-style chat interface to interact with the Llama 3.1 model.
+Now, let's deploy Open WebUI, which provides a ChatGPT-style chat interface to interact with the Llama 4 model.
 
 **Step 1:** Deploy Open WebUI
 
@@ -343,7 +343,7 @@ Open your browser and navigate to [http://localhost:8080](http://localhost:8080)
 
 1. Sign up with your name, email, and password
 2. Click "New Chat"
-3. Select the Llama 3.1 model from the dropdown
+3. Select the Llama 4 model from the dropdown
 4. Start chatting!
 
 
@@ -401,12 +401,12 @@ Key metrics include:
 - `vllm:avg_generation_throughput_toks_per_s` - Average token generation throughput
 
 
-## Deploying Llama 3.1 70B (Multi-GPU)
+## Deploying Llama 4 Maverick (Multi-GPU)
 
-For the larger 70B model, you need multiple GPUs with tensor parallelism.
+For the larger Maverick model with 128 experts, you need multiple GPUs with tensor parallelism.
 
 :::danger
-Important: Deploying Llama 3.1 70B requires 8x A10G GPUs or 2x A100 (80GB) GPUs. This can be expensive. Ensure you monitor your usage carefully.
+Important: Deploying Llama 4 Maverick requires 8x H100 (80GB) GPUs. This can be very expensive. Ensure you monitor your usage carefully.
 :::
 
 **Step 1:** Deploy the 70B model
@@ -419,14 +419,14 @@ envsubst < llama4-vllm-deployment-70b.yml | kubectl apply -f -
 **Step 2:** Monitor the deployment
 
 ```bash
-kubectl get pods -n llama4-vllm -l model=llama4-70b -w
+kubectl get pods -n llama4-vllm -l model=llama4-maverick -w
 ```
 
 :::info
-The 70B model deployment may take 20-30 minutes due to larger model weights download and multi-GPU initialization.
+The Maverick model deployment may take 30-45 minutes due to larger model weights download and multi-GPU initialization.
 :::
 
-**Step 3:** Test the 70B model
+**Step 3:** Test the Maverick model
 
 ```bash
 kubectl -n llama4-vllm port-forward svc/llama4-vllm-70b-svc 8001:8000
@@ -436,7 +436,7 @@ kubectl -n llama4-vllm port-forward svc/llama4-vllm-70b-svc 8001:8000
 curl -X POST http://localhost:8001/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "meta-llama/Llama-3.1-70B-Instruct",
+    "model": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
@@ -451,7 +451,7 @@ To remove all deployed resources:
 kubectl delete -f open-webui.yaml
 ```
 
-**Step 2:** Delete Llama 3.1 vLLM deployment
+**Step 2:** Delete Llama 4 vLLM deployment
 
 ```bash
 kubectl delete -f llama4-vllm-deployment.yml
