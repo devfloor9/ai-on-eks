@@ -435,7 +435,13 @@ kubectl exec -n llama4-vllm -it $(kubectl get pods -n llama4-vllm -l app=llama4-
 
 ### Performance Metrics
 
-vLLM provides built-in metrics at the `/metrics` endpoint:
+vLLM provides built-in metrics at the `/metrics` endpoint. If you haven't already, set up port-forwarding:
+
+```bash
+kubectl -n llama4-vllm port-forward svc/llama4-vllm-svc 8000:8000
+```
+
+Then query the metrics:
 
 ```bash
 curl http://localhost:8000/metrics
