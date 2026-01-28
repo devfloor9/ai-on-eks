@@ -126,11 +126,11 @@ spec:
       - name: cache
         emptyDir:
           sizeLimit: 300Gi
-      # EKS Auto Mode: Force p4de/p5 instance for Maverick model
-      # Maverick requires ~800GB GPU memory, using p4de.24xlarge (640GB) with reduced context
+      # EKS Auto Mode: Force p5.48xlarge instance for Maverick model
+      # Maverick requires ~800GB GPU memory, p5.48xlarge (8x H100 80GB = 640GB) is minimum
       nodeSelector:
         eks.amazonaws.com/compute-type: auto
-        eks.amazonaws.com/instance-category: p
+        node.kubernetes.io/instance-type: p5.48xlarge
       tolerations:
       - key: "nvidia.com/gpu"
         operator: "Exists"
