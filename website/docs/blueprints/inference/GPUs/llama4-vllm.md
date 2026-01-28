@@ -105,11 +105,12 @@ If you already have an EKS cluster, verify that EKS Auto Mode is enabled:
 **Step 1:** Check EKS cluster version
 
 ```bash
-kubectl version --short
+kubectl version
 ```
 
 ```text
 Client Version: v1.30.0
+Kustomize Version: v5.x.x
 Server Version: v1.30.0-eks-xxxxx
 ```
 
