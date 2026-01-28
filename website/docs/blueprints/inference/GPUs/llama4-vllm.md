@@ -18,10 +18,14 @@ Deploying Llama 4 models requires careful memory planning. Llama 4 uses a Mixtur
 
 ### Model Memory Requirements
 
-| Model | Active Params | Total Params | BF16 Memory | Min GPU Config | tensor_parallel_size |
-|-------|---------------|--------------|-------------|----------------|---------------------|
-| Llama 4 Scout (17B-16E) | 17B | ~109B | ~220 GiB | 8x A100 (40GB) | 8 |
-| Llama 4 Maverick (17B-128E) | 17B | ~400B | ~800 GiB | 8x H100 (80GB) | 8 |
+| Model | Active Params | Total Params | BF16 Memory | FP8 Memory | Min GPU Config | tensor_parallel_size |
+|-------|---------------|--------------|-------------|------------|----------------|---------------------|
+| Llama 4 Scout (17B-16E) | 17B | ~109B | ~220 GiB | ~110 GiB | 8x A100 (40GB) | 8 |
+| Llama 4 Maverick (17B-128E) | 17B | ~400B | ~800 GiB | ~400 GiB | 8x A100 (80GB) | 8 |
+
+:::warning
+Llama 4 Maverick in BF16 requires ~800GB GPU memory, which exceeds the capacity of any single-node GPU instance (max 640GB on p4de/p5). This blueprint uses the **FP8 quantized version** (`RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8`) which reduces memory requirements to ~400GB.
+:::
 
 ### EC2 Instance Selection Guide
 
@@ -29,12 +33,17 @@ Deploying Llama 4 models requires careful memory planning. Llama 4 uses a Mixtur
 Llama 4 Scout requires **at least 220GB of GPU memory**. Common GPU instances like g5.48xlarge (8x A10G = 192GB) will fail with CUDA Out of Memory errors.
 :::
 
-| Instance Type | GPU | GPU Memory | Total VRAM | Scout (220GB) | Maverick (800GB) | Cost/hr |
-|--------------|-----|------------|------------|---------------|------------------|---------|
-| g5.48xlarge | 8x A10G | 24GB each | 192GB | ❌ Insufficient | ❌ Insufficient | ~$16 |
-| p4d.24xlarge | 8x A100 | 40GB each | 320GB | ✅ Supported | ❌ Insufficient | ~$32 |
-| p4de.24xlarge | 8x A100 | 80GB each | 640GB | ✅ Recommended | ❌ Insufficient | ~$40 |
-| p5.48xlarge | 8x H100 | 80GB each | 640GB | ✅ Recommended | ✅ Supported | ~$98 |
+| Instance Type | GPU | GPU Memory | Total VRAM | Scout (220GB) | Maverick FP8 (400GB) | Maverick BF16 (800GB) | Cost/hr |
+|--------------|-----|------------|------------|---------------|----------------------|-----------------------|---------|
+| g5.48xlarge | 8x A10G | 24GB each | 192GB | ❌ Insufficient | ❌ Insufficient | ❌ Insufficient | ~$16 |
+| p4d.24xlarge | 8x A100 | 40GB each | 320GB | ✅ Supported | ❌ Insufficient | ❌ Insufficient | ~$32 |
+| p4de.24xlarge | 8x A100 | 80GB each | 640GB | ✅ Recommended | ✅ Supported | ❌ Insufficient | ~$40 |
+| p5.48xlarge | 8x H100 | 80GB each | 640GB | ✅ Recommended | ✅ Supported | ❌ Insufficient | ~$98 |
+| p5e.48xlarge | 8x H200 | 141GB each | 1,128GB | ✅ Recommended | ✅ Supported | ✅ Supported | ~$120+ |
+
+:::info
+p5e.48xlarge with 8x H200 GPUs (1.1TB total VRAM) is the only single-node instance capable of running Maverick in BF16 without quantization. However, availability is limited to specific regions.
+:::
 
 ### Why MoE Models Need More Memory
 
@@ -458,8 +467,12 @@ Key metrics include:
 
 For the larger Maverick model with 128 experts, you need multiple GPUs with tensor parallelism.
 
+:::warning
+Llama 4 Maverick in BF16 requires ~800GB GPU memory, which exceeds the capacity of any single-node instance. This blueprint uses the **FP8 quantized version** from RedHatAI, which reduces memory to ~400GB and fits on p4de.24xlarge or p5.48xlarge instances.
+:::
+
 :::danger
-Important: Deploying Llama 4 Maverick requires 8x H100 (80GB) GPUs. This can be very expensive. Ensure you monitor your usage carefully.
+Important: Deploying Llama 4 Maverick requires 8x A100 (80GB) or 8x H100 (80GB) GPUs. This can be very expensive. Ensure you monitor your usage carefully.
 :::
 
 **Step 1:** Deploy the 70B model
@@ -491,12 +504,12 @@ kubectl -n llama4-vllm port-forward svc/llama4-vllm-70b-svc 8001:8000
 curl -X POST http://localhost:8001/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+    "model": "RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
 
-Alternatively, if Open WebUI is already deployed, the Maverick model will automatically appear in the model dropdown. Simply select `meta-llama/Llama-4-Maverick-17B-128E-Instruct` from the list to start chatting.
+Alternatively, if Open WebUI is already deployed, the Maverick model will automatically appear in the model dropdown. Simply select `RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8` from the list to start chatting.
 
 ## Cleanup
 

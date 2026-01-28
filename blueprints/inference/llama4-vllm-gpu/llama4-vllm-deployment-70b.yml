@@ -1,12 +1,12 @@
 # Llama 4 Maverick vLLM Deployment for EKS Auto Mode (Multi-GPU)
-# This manifest deploys Llama 4 Maverick 17B-128E model using vLLM with tensor parallelism
+# This manifest deploys Llama 4 Maverick 17B-128E FP8 quantized model using vLLM with tensor parallelism
 # Prerequisites: EKS cluster >= 1.30 with Auto Mode enabled
 #
 # IMPORTANT: GPU Memory Requirements
-# - Llama 4 Maverick requires ~800GB GPU memory (MoE architecture loads all 128 experts)
-# - p4d.24xlarge (320GB) and p4de.24xlarge (640GB) are NOT sufficient
-# - Minimum: p5.48xlarge (8x H100 80GB = 640GB) with reduced context length
-# - Recommended: Multiple p5.48xlarge nodes with pipeline parallelism
+# - Llama 4 Maverick (BF16) requires ~800GB GPU memory - exceeds single node capacity
+# - FP8 quantized version reduces memory to ~400GB, fitting on p4de/p5 instances
+# - Minimum: p4de.24xlarge (8x A100 80GB = 640GB) or p5.48xlarge (8x H100 80GB = 640GB)
+# - Using RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8 for memory efficiency
 #
 # Usage:
 #   export HUGGING_FACE_HUB_TOKEN=$(echo -n "your-hf-token" | base64)
@@ -74,15 +74,15 @@ spec:
           value: "INFO"
         args:
         - "--model"
-        - "meta-llama/Llama-4-Maverick-17B-128E-Instruct"
+        - "RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8"
         - "--tensor-parallel-size"
         - "8"
         - "--max-model-len"
-        - "4096"
+        - "8192"
         - "--gpu-memory-utilization"
-        - "0.95"
+        - "0.9"
         - "--dtype"
-        - "bfloat16"
+        - "auto"
         - "--trust-remote-code"
         - "--host"
         - "0.0.0.0"
@@ -126,11 +126,11 @@ spec:
       - name: cache
         emptyDir:
           sizeLimit: 300Gi
-      # EKS Auto Mode: Force p5.48xlarge instance for Maverick model
-      # Maverick requires ~800GB GPU memory, p5.48xlarge (8x H100 80GB = 640GB) is minimum
+      # EKS Auto Mode: Force p4de/p5 instance for Maverick FP8 model
+      # Maverick FP8 requires ~400GB GPU memory, p4de.24xlarge or p5.48xlarge (640GB) is sufficient
       nodeSelector:
         eks.amazonaws.com/compute-type: auto
-        node.kubernetes.io/instance-type: p5.48xlarge
+        eks.amazonaws.com/instance-category: p
       tolerations:
       - key: "nvidia.com/gpu"
         operator: "Exists"
