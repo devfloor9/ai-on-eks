@@ -77,7 +77,7 @@ To simplify the demo process, we assume the use of an IAM role with administrati
 
 This blueprint requires an EKS cluster with the following configuration:
 
-- **EKS Version**: >= 1.30
+- **EKS Version**: >= 1.30 (required for EKS Auto Mode support)
 - **EKS Auto Mode**: Enabled (for automatic GPU node provisioning)
 - **NVIDIA Device Plugin**: Automatically managed by EKS Auto Mode
 
@@ -88,12 +88,12 @@ If you don't have an existing EKS cluster, you can quickly create one using `eks
 ```bash
 eksctl create cluster \
   --name llama4-cluster \
-  --region us-west-2 \
-  --auto-mode
+  --region $AWS_REGION \
+  --enabme-auto-mode
 ```
 
 :::info
-Cluster creation takes approximately 10-15 minutes. The `--auto-mode` flag enables EKS Auto Mode, which automatically manages node provisioning.
+Cluster creation takes approximately 10-15 minutes. The `--enable-auto-mode` flag enables EKS Auto Mode, which automatically manages node provisioning.
 :::
 
 After the cluster is created, proceed to **Step 3** below to create a GPU NodePool.
@@ -481,6 +481,8 @@ The Maverick model deployment may take 30-45 minutes due to larger model weights
 
 **Step 3:** Test the Maverick model
 
+You can test using curl:
+
 ```bash
 kubectl -n llama4-vllm port-forward svc/llama4-vllm-70b-svc 8001:8000
 ```
@@ -493,6 +495,8 @@ curl -X POST http://localhost:8001/v1/chat/completions \
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
+
+Alternatively, if Open WebUI is already deployed, the Maverick model will automatically appear in the model dropdown. Simply select `meta-llama/Llama-4-Maverick-17B-128E-Instruct` from the list to start chatting.
 
 ## Cleanup
 
