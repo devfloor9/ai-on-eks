@@ -274,9 +274,54 @@ llama4-vllm-svc   ClusterIP   172.20.xxx.xx   <none>        8000/TCP   10m
 ```
 
 
-## Testing the Llama 4 Model
+## Deploy Open WebUI and Chat with Llama 4
 
-Now it's time to test the Llama 4 chat model.
+Now, let's deploy Open WebUI, which provides a ChatGPT-style chat interface to interact with the Llama 4 model.
+
+**Step 1:** Deploy Open WebUI
+
+```bash
+kubectl apply -f open-webui.yaml
+```
+
+**Output:**
+
+```text
+namespace/open-webui created
+deployment.apps/open-webui created
+service/open-webui created
+```
+
+**Step 2:** Verify the deployment
+
+```bash
+kubectl get pods -n open-webui
+```
+
+```text
+NAME                          READY   STATUS    RESTARTS   AGE
+open-webui-xxxxxxxxx-xxxxx    1/1     Running   0          2m
+```
+
+**Step 3:** Access the Open WebUI
+
+```bash
+kubectl -n open-webui port-forward svc/open-webui 8080:80
+```
+
+Open your browser and navigate to [http://localhost:8080](http://localhost:8080)
+
+**Step 4:** Register and start chatting
+
+1. Sign up with your name, email, and password
+2. Click "New Chat"
+3. Select the Llama 4 Scout model from the dropdown
+4. Start chatting!
+
+
+## Testing with curl (Optional)
+
+You can also test the Llama 4 model directly using curl commands.
 
 **Step 1:** Port-forward the vLLM service
 
@@ -356,51 +401,6 @@ curl -X POST http://localhost:8000/v1/chat/completions \
     "stream": true
   }'
 ```
-
-## Deploy Open WebUI
-
-Now, let's deploy Open WebUI, which provides a ChatGPT-style chat interface to interact with the Llama 4 model.
-
-**Step 1:** Deploy Open WebUI
-
-```bash
-cd ai-on-eks/blueprints/inference/llama4-vllm-gpu/
-kubectl apply -f open-webui.yaml
-```
-
-**Output:**
-
-```text
-namespace/open-webui created
-deployment.apps/open-webui created
-service/open-webui created
-```
-
-**Step 2:** Verify the deployment
-
-```bash
-kubectl get pods -n open-webui
-```
-
-```text
-NAME                          READY   STATUS    RESTARTS   AGE
-open-webui-xxxxxxxxx-xxxxx    1/1     Running   0          2m
-```
-
-**Step 3:** Access the Open WebUI
-
-```bash
-kubectl -n open-webui port-forward svc/open-webui 8080:80
-```
-
-Open your browser and navigate to [http://localhost:8080](http://localhost:8080)
-
-**Step 4:** Register and start chatting
-
-1. Sign up with your name, email, and password
-2. Click "New Chat"
-3. Select the Llama 4 model from the dropdown
-4. Start chatting!
 
 
 ## Monitoring and Observability
