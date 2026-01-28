@@ -70,17 +70,37 @@ To simplify the demo process, we assume the use of an IAM role with administrati
 
 1. [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 2. [kubectl](https://kubernetes.io/docs/tasks/tools/)
-3. [envsubst](https://pypi.org/project/envsubst/)
+3. [eksctl](https://eksctl.io/installation/) (optional, for cluster creation)
+4. [envsubst](https://pypi.org/project/envsubst/)
 
 ### EKS Cluster Requirements
 
-This blueprint requires an existing EKS cluster with the following configuration:
+This blueprint requires an EKS cluster with the following configuration:
 
 - **EKS Version**: >= 1.30
 - **EKS Auto Mode**: Enabled (for automatic GPU node provisioning)
 - **NVIDIA Device Plugin**: Automatically managed by EKS Auto Mode
 
-### Verify EKS Cluster Environment
+### Option A: Create a New EKS Auto Mode Cluster
+
+If you don't have an existing EKS cluster, you can quickly create one using `eksctl`:
+
+```bash
+eksctl create cluster \
+  --name llama4-cluster \
+  --region us-west-2 \
+  --auto-mode
+```
+
+:::info
+Cluster creation takes approximately 10-15 minutes. The `--auto-mode` flag enables EKS Auto Mode, which automatically manages node provisioning.
+:::
+
+After the cluster is created, proceed to **Step 3** below to create a GPU NodePool.
+
+### Option B: Use an Existing EKS Cluster
+
+If you already have an EKS cluster, verify that EKS Auto Mode is enabled:
 
 **Step 1:** Check EKS cluster version
 
@@ -103,7 +123,7 @@ aws eks describe-cluster --name <cluster-name> --query 'cluster.computeConfig.en
 true
 ```
 
-**Step 3:** Verify GPU NodePool exists
+### Step 3: Configure GPU NodePool
 
 EKS Auto Mode requires a GPU NodePool to provision GPU instances. Check if a GPU NodePool exists:
 
@@ -147,7 +167,7 @@ spec:
           operator: In
           values: ["g", "p"]
         - key: eks.amazonaws.com/instance-generation
-          operator: Gt
+          operator: Gte
           values: ["4"]
         - key: kubernetes.io/arch
           operator: In
@@ -162,7 +182,7 @@ EOF
 ```
 
 :::info
-The default `general-purpose` NodePool only supports CPU instance categories (c, m, r). GPU instances (g, p categories) require a dedicated GPU NodePool.
+The default `general-purpose` NodePool only supports CPU instance categories (c, m, r). GPU instances (g, p categories) require a dedicated GPU NodePool. The `instance-generation: Gte 4` ensures p4d/p4de/p5 instances are available for Llama 4 models.
 :::
 
 **Step 4:** Verify NVIDIA Device Plugin (Auto Mode manages this automatically)
