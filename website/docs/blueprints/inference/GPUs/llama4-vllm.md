@@ -509,7 +509,22 @@ curl -X POST http://localhost:8001/v1/chat/completions \
   }'
 ```
 
-Alternatively, if Open WebUI is already deployed, the Maverick model will automatically appear in the model dropdown. Simply select `RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8` from the list to start chatting.
+**Step 4:** Add Maverick to Open WebUI
+
+If you want to use both Scout and Maverick models in Open WebUI, update the environment variable to include both services:
+
+```bash
+kubectl set env deployment/open-webui -n open-webui \
+  OPENAI_API_BASE_URLS="http://llama4-vllm-svc.llama4-vllm.svc.cluster.local:8000/v1;http://llama4-vllm-70b-svc.llama4-vllm.svc.cluster.local:8000/v1"
+```
+
+Wait for the Open WebUI pod to restart:
+
+```bash
+kubectl rollout status deployment/open-webui -n open-webui
+```
+
+Now both models will appear in the Open WebUI model dropdown.
 
 ## Cleanup
 
