@@ -47,7 +47,6 @@ The compiled artifacts must be stored in a location accessible to the deployment
 See the [NxD Inference Llama 4 Tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/nxd-inference/tutorials/llama4-tutorial.html) for detailed compilation instructions.
 :::
 
-
 <CollapsibleContent header={<h2><span>Prerequisites and EKS Cluster Setup</span></h2>}>
 
 ### Prerequisites
@@ -140,7 +139,6 @@ Expected output for trn2.48xlarge:
 
 </CollapsibleContent>
 
-
 <CollapsibleContent header={<h2><span>Model Compilation (Required First Step)</span></h2>}>
 
 Before deploying, you must compile the Llama 4 model for Neuron. This process creates optimized artifacts that can be reused across deployments.
@@ -208,7 +206,6 @@ scout_neuron_config = {
 
 </CollapsibleContent>
 
-
 ## Deploying Llama 4 Scout with Helm
 
 :::caution
@@ -252,7 +249,6 @@ NAME                                      READY   STATUS    RESTARTS   AGE
 llama-4-scout-17b-vllm-nrn-xxxxx-xxxxx    1/1     Running   0          15m
 ```
 
-
 ## Deploying Llama 4 Maverick
 
 For the larger Maverick model with 128 experts:
@@ -266,7 +262,6 @@ helm install llama4-maverick ai-on-eks/inference-charts \
 :::warning
 Maverick model compilation takes significantly longer (60-90 minutes) due to the larger number of experts.
 :::
-
 
 ## Testing the Deployment
 
@@ -323,7 +318,6 @@ curl -X POST http://localhost:8000/v1/chat/completions \
   }'
 ```
 
-
 ## Helm Values Configuration
 
 The Helm chart uses the following key configuration for Trainium2 deployments:
@@ -362,7 +356,6 @@ inference:
       NEURON_COMPILED_ARTIFACTS: ""  # Set via --set flag
 ```
 
-
 ## Monitoring
 
 ### Check Pod Logs
@@ -377,7 +370,6 @@ kubectl logs -l app=llama-4-scout-17b-vllm-nrn -f
 kubectl exec -it $(kubectl get pods -l app=llama-4-scout-17b-vllm-nrn -o jsonpath='{.items[0].metadata.name}') -- neuron-top
 ```
 
-
 ## Cleanup
 
 ```bash
@@ -385,7 +377,6 @@ helm uninstall llama4-scout
 # Or for Maverick:
 helm uninstall llama4-maverick
 ```
-
 
 ## Key Takeaways
 
@@ -398,7 +389,6 @@ helm uninstall llama4-maverick
 4. **Multimodal Support**: Llama 4 on Trainium2 supports both text and image inputs.
 
 5. **Helm-based Deployment**: Use the AI on EKS inference charts for standardized, reproducible deployments.
-
 
 ## References
 

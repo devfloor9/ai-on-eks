@@ -24,7 +24,7 @@ helm install llama4-maverick ai-on-eks/inference-charts \
 
 ## Documentation
 
-See the full documentation at: https://awslabs.github.io/ai-on-eks/docs/blueprints/inference/Neuron/llama4-trn2
+See the full documentation at: [AI on EKS - Llama 4 on Trainium2](https://awslabs.github.io/ai-on-eks/docs/blueprints/inference/Neuron/llama4-trn2)
 
 ## Important Note
 
