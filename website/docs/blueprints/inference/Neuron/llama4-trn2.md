@@ -37,6 +37,16 @@ Unlike GPU deployments, Trainium2 uses the **original BF16/FP16 models** without
 Llama 4 models require `tensor_parallel_size=64` which means you need a full trn2.48xlarge instance with all 64 Neuron cores. The 1.5 TiB HBM memory is sufficient for both Scout and Maverick models in BF16 precision.
 :::
 
+### Model Compilation (Tracing) Requirement
+
+:::danger Important
+Before deploying Llama 4 on Trainium2, the model must be **pre-compiled (traced)** for Neuron. This is a one-time process that converts the model weights to Neuron-optimized format.
+
+The compiled artifacts must be stored in a location accessible to the deployment (e.g., S3 bucket or EFS volume) and referenced via the `NEURON_COMPILED_ARTIFACTS` environment variable.
+
+See the [NxD Inference Llama 4 Tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/nxd-inference/tutorials/llama4-tutorial.html) for detailed compilation instructions.
+:::
+
 
 <CollapsibleContent header={<h2><span>Prerequisites and EKS Cluster Setup</span></h2>}>
 
@@ -44,8 +54,8 @@ Llama 4 models require `tensor_parallel_size=64` which means you need a full trn
 
 1. [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 2. [kubectl](https://kubernetes.io/docs/tasks/tools/)
-3. [eksctl](https://eksctl.io/installation/)
-4. [envsubst](https://pypi.org/project/envsubst/)
+3. [Helm](https://helm.sh/docs/intro/install/)
+4. [eksctl](https://eksctl.io/installation/)
 
 ### EKS Cluster Requirements
 
@@ -86,90 +96,139 @@ Expected output for trn2.48xlarge:
 </CollapsibleContent>
 
 
-## Deploying Llama 4 Scout with vLLM
+<CollapsibleContent header={<h2><span>Model Compilation (Required First Step)</span></h2>}>
+
+Before deploying, you must compile the Llama 4 model for Neuron. This process creates optimized artifacts that can be reused across deployments.
+
+### Option 1: Compile on a Trainium2 Instance
+
+SSH into a trn2.48xlarge instance with the Neuron SDK installed:
+
+```bash
+# Activate Neuron virtual environment
+source /opt/aws_neuronx_venv_pytorch/bin/activate
+
+# Install vLLM-Neuron plugin
+pip install vllm-neuron --upgrade
+
+# Set compilation output directory
+export NEURON_COMPILED_ARTIFACTS="/home/ubuntu/llama4/traced_models/Llama-4-Scout-17B-16E-Instruct"
+
+# Run vLLM to trigger compilation (this takes 30-60 minutes)
+python3 -m vllm.entrypoints.openai.api_server \
+  --model "meta-llama/Llama-4-Scout-17B-16E-Instruct" \
+  --max-num-seqs 1 \
+  --max-model-len 16384 \
+  --tensor-parallel-size 64 \
+  --port 8000
+```
+
+### Option 2: Use Pre-compiled Artifacts
+
+If you have access to pre-compiled artifacts, upload them to S3:
+
+```bash
+aws s3 sync /home/ubuntu/llama4/traced_models/ s3://your-bucket/llama4-neuron-artifacts/
+```
+
+### Neuron Configuration for Compilation
+
+For optimal performance, use this configuration during compilation:
+
+```python
+scout_neuron_config = {
+    "text_config": {
+        "batch_size": 1,
+        "is_continuous_batching": True,
+        "seq_len": 16384,
+        "enable_bucketing": True,
+        "context_encoding_buckets": [256, 512, 1024, 2048, 4096, 8192, 10240, 16384],
+        "token_generation_buckets": [256, 512, 1024, 2048, 4096, 8192, 10240, 16384],
+        "torch_dtype": "float16",
+        "async_mode": True,
+        "world_size": 64,
+        "tp_degree": 64,
+        "cp_degree": 16
+    },
+    "vision_config": {
+        "batch_size": 1,
+        "seq_len": 8192,
+        "torch_dtype": "float16",
+        "tp_degree": 16,
+        "dp_degree": 4,
+        "world_size": 64
+    }
+}
+```
+
+</CollapsibleContent>
+
+
+## Deploying Llama 4 Scout with Helm
 
 :::caution
 The use of [Llama 4](https://huggingface.co/meta-llama) models requires access through a Hugging Face account. Make sure you have accepted the model license on HuggingFace.
 :::
 
-**Step 1:** Export the Hugging Face Hub Token
+**Step 1:** Add the AI on EKS Helm repository
 
 ```bash
-export HUGGING_FACE_HUB_TOKEN=$(echo -n "Your-Hugging-Face-Hub-Token-Value" | base64)
+helm repo add ai-on-eks https://awslabs.github.io/ai-on-eks-charts
+helm repo update
 ```
 
-**Step 2:** Clone the repository
+**Step 2:** Create a Kubernetes secret for Hugging Face token
 
 ```bash
-git clone https://github.com/awslabs/ai-on-eks.git
-cd ai-on-eks
+kubectl create secret generic hf-token \
+  --from-literal=hf-token=$(echo -n "Your-Hugging-Face-Hub-Token-Value" | base64)
 ```
 
-**Step 3:** Deploy the vLLM service
+**Step 3:** Deploy Llama 4 Scout using Helm
 
 ```bash
-cd blueprints/inference/llama4-vllm-trn2/
-envsubst < llama4-vllm-trn2-deployment.yaml | kubectl apply -f -
-```
-
-**Output:**
-
-```text
-namespace/llama4-vllm created
-secret/hf-token created
-configmap/llama4-neuron-config created
-deployment.apps/llama4-vllm-trn2 created
-service/llama4-vllm-trn2-svc created
+helm install llama4-scout ai-on-eks/inference-charts \
+  -f https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/main/charts/inference-charts/values-llama-4-scout-17b-vllm-neuron.yaml \
+  --set inference.modelServer.env.NEURON_COMPILED_ARTIFACTS="s3://your-bucket/llama4-neuron-artifacts/Llama-4-Scout-17B-16E-Instruct"
 ```
 
 **Step 4:** Monitor the deployment
 
 ```bash
-kubectl get pods -n llama4-vllm -w
+kubectl get pods -w
 ```
 
 :::info
-The first deployment may take 30-60 minutes as the model needs to be compiled (traced) for Neuron. Subsequent deployments with cached artifacts will be faster.
+With pre-compiled artifacts, the deployment should be ready in 10-15 minutes. Without pre-compiled artifacts, the first deployment will trigger compilation which takes 30-60 minutes.
 :::
 
 ```text
-NAME                                READY   STATUS    RESTARTS   AGE
-llama4-vllm-trn2-xxxxxxxxx-xxxxx    1/1     Running   0          45m
+NAME                                      READY   STATUS    RESTARTS   AGE
+llama-4-scout-17b-vllm-nrn-xxxxx-xxxxx    1/1     Running   0          15m
 ```
 
 
-## Deploy Open WebUI
+## Deploying Llama 4 Maverick
 
-Deploy Open WebUI for a ChatGPT-style interface:
-
-**Step 1:** Deploy Open WebUI
+For the larger Maverick model with 128 experts:
 
 ```bash
-kubectl apply -f open-webui.yaml
+helm install llama4-maverick ai-on-eks/inference-charts \
+  -f https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/main/charts/inference-charts/values-llama-4-maverick-17b-vllm-neuron.yaml \
+  --set inference.modelServer.env.NEURON_COMPILED_ARTIFACTS="s3://your-bucket/llama4-neuron-artifacts/Llama-4-Maverick-17B-128E-Instruct"
 ```
 
-**Step 2:** Access the UI
-
-```bash
-kubectl -n open-webui port-forward svc/open-webui 8080:80
-```
-
-Open [http://localhost:8080](http://localhost:8080) in your browser.
-
-**Step 3:** Register and start chatting
-
-1. Sign up with your name, email, and password
-2. Click "New Chat"
-3. Select the Llama 4 Scout model
-4. Start chatting with text or upload images!
+:::warning
+Maverick model compilation takes significantly longer (60-90 minutes) due to the larger number of experts.
+:::
 
 
-## Testing with curl
+## Testing the Deployment
 
 ### Text Completion
 
 ```bash
-kubectl -n llama4-vllm port-forward svc/llama4-vllm-trn2-svc 8000:8000
+kubectl port-forward svc/llama-4-scout-17b-vllm-nrn 8000:8000
 ```
 
 ```bash
@@ -220,57 +279,43 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 ```
 
 
-## Deploying Llama 4 Maverick
+## Helm Values Configuration
 
-For the larger Maverick model with 128 experts:
+The Helm chart uses the following key configuration for Trainium2 deployments:
 
-```bash
-envsubst < llama4-vllm-trn2-maverick.yaml | kubectl apply -f -
+```yaml
+# values-llama-4-scout-17b-vllm-neuron.yaml
+model: meta-llama/Llama-4-Scout-17B-16E-Instruct
+
+modelParameters:
+  maxModelLen: 16384
+  tensorParallelSize: 64
+  maxNumSeqs: 1
+
+inference:
+  serviceName: llama-4-scout-17b-vllm-nrn
+  accelerator: neuron
+  framework: vllm
+
+  modelServer:
+    image:
+      repository: public.ecr.aws/neuron/pytorch-inference-neuronx
+      tag: 2.5.1-neuronx-py310-sdk2.21.0-ubuntu22.04
+    deployment:
+      resources:
+        neuron:
+          requests:
+            aws.amazon.com/neuron: 32
+            memory: 512Gi
+          limits:
+            aws.amazon.com/neuron: 32
+            memory: 768Gi
+      nodeSelector:
+        node.kubernetes.io/instance-type: trn2.48xlarge
+    env:
+      VLLM_USE_V1: "1"
+      NEURON_COMPILED_ARTIFACTS: ""  # Set via --set flag
 ```
-
-Monitor deployment:
-
-```bash
-kubectl get pods -n llama4-vllm -l model=llama4-maverick -w
-```
-
-:::warning
-Maverick model compilation takes significantly longer (60-90 minutes) due to the larger number of experts.
-:::
-
-
-## Neuron Configuration
-
-The deployment includes optimized Neuron configuration for Llama 4:
-
-```json
-{
-  "text_config": {
-    "batch_size": 1,
-    "is_continuous_batching": true,
-    "seq_len": 16384,
-    "torch_dtype": "float16",
-    "async_mode": true,
-    "world_size": 64,
-    "tp_degree": 64,
-    "cp_degree": 16
-  },
-  "vision_config": {
-    "batch_size": 1,
-    "seq_len": 8192,
-    "torch_dtype": "float16",
-    "tp_degree": 16,
-    "dp_degree": 4,
-    "world_size": 64
-  }
-}
-```
-
-Key parameters:
-- `tp_degree=64`: Tensor parallelism across all Neuron cores
-- `cp_degree=16`: Context parallelism for efficient attention
-- `async_mode=true`: Asynchronous execution for better throughput
-- `enable_bucketing=true`: Dynamic batching for variable input lengths
 
 
 ## Monitoring
@@ -278,42 +323,42 @@ Key parameters:
 ### Check Pod Logs
 
 ```bash
-kubectl logs -n llama4-vllm -l app=llama4-vllm-trn2 -f
+kubectl logs -l app=llama-4-scout-17b-vllm-nrn -f
 ```
 
 ### Check Neuron Device Utilization
 
 ```bash
-kubectl exec -n llama4-vllm -it $(kubectl get pods -n llama4-vllm -l app=llama4-vllm-trn2 -o jsonpath='{.items[0].metadata.name}') -- neuron-top
+kubectl exec -it $(kubectl get pods -l app=llama-4-scout-17b-vllm-nrn -o jsonpath='{.items[0].metadata.name}') -- neuron-top
 ```
 
 
 ## Cleanup
 
 ```bash
-kubectl delete -f open-webui.yaml
-kubectl delete -f llama4-vllm-trn2-deployment.yaml
+helm uninstall llama4-scout
 # Or for Maverick:
-kubectl delete -f llama4-vllm-trn2-maverick.yaml
+helm uninstall llama4-maverick
 ```
 
 
 ## Key Takeaways
 
-1. **Cost-Effective Inference**: Trainium2 provides excellent price-performance for large MoE models like Llama 4.
+1. **Pre-compilation Required**: Unlike GPU deployments, Trainium2 requires model compilation before deployment.
 
-2. **Multimodal Support**: Llama 4 on Trainium2 supports both text and image inputs.
+2. **Cost-Effective Inference**: Trainium2 provides excellent price-performance for large MoE models like Llama 4.
 
-3. **NxD Inference**: The Neuron SDK's NxD Inference library enables efficient distributed inference.
+3. **No Quantization Needed**: Trainium2's 1.5 TiB HBM memory supports full BF16 precision for both Scout and Maverick.
 
-4. **OpenAI-Compatible API**: vLLM provides an OpenAI-compatible API for easy integration.
+4. **Multimodal Support**: Llama 4 on Trainium2 supports both text and image inputs.
 
-5. **Model Compilation**: First deployment requires model compilation (tracing), but subsequent deployments are faster with cached artifacts.
+5. **Helm-based Deployment**: Use the AI on EKS inference charts for standardized, reproducible deployments.
 
 
 ## References
 
 - [NxD Inference Llama 4 Tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/nxd-inference/tutorials/llama4-tutorial.html)
+- [AI on EKS Inference Charts](https://github.com/awslabs/ai-on-eks-charts)
 - [vLLM-Neuron Plugin](https://github.com/aws-neuron/vllm-neuron)
 - [AWS Neuron SDK Documentation](https://awsdocs-neuron.readthedocs-hosted.com/)
 - [Llama 4 on Hugging Face](https://huggingface.co/meta-llama)
