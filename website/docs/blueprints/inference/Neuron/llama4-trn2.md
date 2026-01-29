@@ -9,7 +9,7 @@ import CollapsibleContent from '../../../../src/components/CollapsibleContent';
 This guide demonstrates deploying [Llama 4](https://huggingface.co/meta-llama) models using [vLLM](https://github.com/vllm-project/vllm) with [NxD Inference](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/nxd-inference/) on [AWS Trainium2](https://aws.amazon.com/machine-learning/trainium/) instances.
 
 :::info
-This blueprint uses **AWS Trainium2 (trn2)** instances with the Neuron SDK for cost-effective inference. Llama 4 models support both text and image inputs (multimodal).
+This blueprint supports **EKS Auto Mode** for automatic Trainium2 node provisioning. EKS Auto Mode automatically manages the Neuron device plugin, eliminating manual driver installation.
 :::
 
 ## Understanding Trainium2 Requirements
@@ -65,17 +65,62 @@ See the [NxD Inference Llama 4 Tutorial](https://awsdocs-neuron.readthedocs-host
 
 ### Create EKS Cluster with Trainium2 Support
 
+You can use EKS Auto Mode for automatic Trainium2 node provisioning:
+
 ```bash
 eksctl create cluster \
   --name llama4-trn2-cluster \
   --region us-east-1 \
-  --node-type trn2.48xlarge \
-  --nodes 1 \
-  --nodes-min 0 \
-  --nodes-max 2
+  --enable-auto-mode
 ```
 
-### Install Neuron Device Plugin
+### Create Trainium NodePool for EKS Auto Mode
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: trainium
+spec:
+  disruption:
+    budgets:
+      - nodes: 10%
+    consolidateAfter: 30s
+    consolidationPolicy: WhenEmptyOrUnderutilized
+  template:
+    spec:
+      expireAfter: 336h
+      nodeClassRef:
+        group: eks.amazonaws.com
+        kind: NodeClass
+        name: default
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values: ["trn2.48xlarge"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+      taints:
+        - key: aws.amazon.com/neuron
+          effect: NoSchedule
+EOF
+```
+
+:::info
+EKS Auto Mode automatically manages the Neuron device plugin - no manual installation required!
+:::
+
+### Install Neuron Device Plugin (Only for non-Auto Mode clusters)
+
+If you're NOT using EKS Auto Mode, install the Neuron device plugin manually:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/aws-neuron/aws-neuron-sdk/master/src/k8/k8s-neuron-device-plugin.yml
