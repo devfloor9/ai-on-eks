@@ -1,0 +1,202 @@
+# Llama 4 Scout vLLM Deployment for EKS with Trainium2 (trn2)
+# This manifest deploys Llama 4 Scout 17B-16E model using vLLM with NxD Inference on Trainium2
+# Prerequisites: EKS cluster with Trainium2 nodes and Neuron SDK
+#
+# IMPORTANT: Trainium2 Requirements
+# - Llama 4 Scout requires trn2.48xlarge (64 Neuron cores) with tensor_parallel_size=64
+# - Llama 4 Maverick requires trn2.48xlarge with tensor_parallel_size=64
+# - Model must be pre-compiled (traced) before deployment
+#
+# Usage:
+#   export HUGGING_FACE_HUB_TOKEN=$(echo -n "your-hf-token" | base64)
+#   envsubst < llama4-vllm-trn2-deployment.yaml | kubectl apply -f -
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llama4-vllm
+  labels:
+    app.kubernetes.io/name: llama4-vllm
+    app.kubernetes.io/component: inference
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hf-token
+  namespace: llama4-vllm
+  labels:
+    app.kubernetes.io/name: llama4-vllm
+type: Opaque
+data:
+  hf-token: $HUGGING_FACE_HUB_TOKEN
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama4-neuron-config
+  namespace: llama4-vllm
+data:
+  neuron_config.json: |
+    {
+      "override_neuron_config": {
+        "text_config": {
+          "batch_size": 1,
+          "is_continuous_batching": true,
+          "seq_len": 16384,
+          "enable_bucketing": true,
+          "context_encoding_buckets": [256, 512, 1024, 2048, 4096, 8192, 10240, 16384],
+          "token_generation_buckets": [256, 512, 1024, 2048, 4096, 8192, 10240, 16384],
+          "torch_dtype": "float16",
+          "async_mode": true,
+          "world_size": 64,
+          "tp_degree": 64,
+          "cp_degree": 16
+        },
+        "vision_config": {
+          "batch_size": 1,
+          "seq_len": 8192,
+          "torch_dtype": "float16",
+          "tp_degree": 16,
+          "cp_degree": 1,
+          "dp_degree": 4,
+          "world_size": 64
+        }
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama4-vllm-trn2
+  namespace: llama4-vllm
+  labels:
+    app: llama4-vllm-trn2
+    app.kubernetes.io/name: llama4-vllm
+    app.kubernetes.io/component: inference
+    model: llama4-scout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llama4-vllm-trn2
+  template:
+    metadata:
+      labels:
+        app: llama4-vllm-trn2
+        model: llama4-scout
+    spec:
+      containers:
+      - name: vllm-neuron
+        # Use Neuron DLC image with vLLM support
+        image: public.ecr.aws/neuron/pytorch-inference-neuronx:2.5.1-neuronx-py310-sdk2.21.0-ubuntu22.04
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        env:
+        - name: HUGGING_FACE_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token
+              key: hf-token
+        # Neuron environment variables
+        - name: VLLM_USE_V1
+          value: "1"
+        - name: NEURON_COMPILED_ARTIFACTS
+          value: "/models/traced_models/Llama-4-Scout-17B-16E-Instruct"
+        - name: VLLM_RPC_TIMEOUT
+          value: "100000"
+        - name: NEURON_RT_LOG_LEVEL
+          value: "INFO"
+        - name: NEURON_CC_FLAGS
+          value: "-O1"
+        command:
+        - /bin/bash
+        - -c
+        - |
+          pip install vllm-neuron --upgrade
+          python3 -m vllm.entrypoints.openai.api_server \
+            --model "meta-llama/Llama-4-Scout-17B-16E-Instruct" \
+            --max-num-seqs 1 \
+            --max-model-len 16384 \
+            --tensor-parallel-size 64 \
+            --port 8000 \
+            --host 0.0.0.0 \
+            --disable-log-requests \
+            --limit-mm-per-prompt image=5
+        resources:
+          limits:
+            aws.amazon.com/neuron: 32  # trn2.48xlarge has 32 Neuron devices (64 cores)
+            cpu: "192"
+            memory: "768Gi"
+          requests:
+            aws.amazon.com/neuron: 32
+            cpu: "128"
+            memory: "512Gi"
+        volumeMounts:
+        - name: shm
+          mountPath: /dev/shm
+        - name: models
+          mountPath: /models
+        - name: neuron-config
+          mountPath: /config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 1800  # Model compilation takes time
+          periodSeconds: 60
+          timeoutSeconds: 30
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 900
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 10
+      volumes:
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 128Gi
+      - name: models
+        emptyDir:
+          sizeLimit: 1Ti
+      - name: neuron-config
+        configMap:
+          name: llama4-neuron-config
+      # Trainium2 node selection
+      nodeSelector:
+        node.kubernetes.io/instance-type: trn2.48xlarge
+      tolerations:
+      - key: "aws.amazon.com/neuron"
+        operator: "Exists"
+        effect: "NoSchedule"
+      terminationGracePeriodSeconds: 300
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama4-vllm-trn2-svc
+  namespace: llama4-vllm
+  labels:
+    app: llama4-vllm-trn2
+    app.kubernetes.io/name: llama4-vllm
+    app.kubernetes.io/component: inference
+spec:
+  type: ClusterIP
+  selector:
+    app: llama4-vllm-trn2
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
