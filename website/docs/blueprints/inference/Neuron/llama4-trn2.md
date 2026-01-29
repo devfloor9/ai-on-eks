@@ -16,21 +16,25 @@ This blueprint uses **AWS Trainium2 (trn2)** instances with the Neuron SDK for c
 
 Llama 4 models use a Mixture of Experts (MoE) architecture that requires significant compute resources. Trainium2 provides excellent price-performance for these large models.
 
-### Model Requirements
+### Model Memory Requirements
 
-| Model | Active Params | Total Params | Experts | Instance Required | tensor_parallel_size |
-|-------|---------------|--------------|---------|-------------------|---------------------|
-| Llama 4 Scout | 17B | ~109B | 16 | trn2.48xlarge | 64 |
-| Llama 4 Maverick | 17B | ~400B | 128 | trn2.48xlarge | 64 |
+| Model | Active Params | Total Params | Experts | BF16 Memory | Instance Required | tensor_parallel_size |
+|-------|---------------|--------------|---------|-------------|-------------------|---------------------|
+| Llama 4 Scout | 17B | ~109B | 16 | ~220 GiB | trn2.48xlarge | 64 |
+| Llama 4 Maverick | 17B | ~400B | 128 | ~800 GiB | trn2.48xlarge | 64 |
+
+:::info
+Unlike GPU deployments, Trainium2 uses the **original BF16/FP16 models** without quantization. The Neuron SDK efficiently manages memory across all 64 Neuron cores.
+:::
 
 ### Trainium2 Instance Specifications
 
-| Instance Type | Neuron Devices | Neuron Cores | Memory | Use Case |
-|--------------|----------------|--------------|--------|----------|
-| trn2.48xlarge | 32 | 64 | 768 GiB | Scout & Maverick |
+| Instance Type | Neuron Devices | Neuron Cores | HBM Memory | Use Case |
+|--------------|----------------|--------------|------------|----------|
+| trn2.48xlarge | 32 | 64 | 1.5 TiB | Scout & Maverick (BF16) |
 
 :::warning
-Llama 4 models require `tensor_parallel_size=64` which means you need a full trn2.48xlarge instance with all 64 Neuron cores.
+Llama 4 models require `tensor_parallel_size=64` which means you need a full trn2.48xlarge instance with all 64 Neuron cores. The 1.5 TiB HBM memory is sufficient for both Scout and Maverick models in BF16 precision.
 :::
 
 
