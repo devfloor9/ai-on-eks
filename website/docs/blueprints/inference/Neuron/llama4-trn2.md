@@ -9,7 +9,7 @@ import CollapsibleContent from '../../../../src/components/CollapsibleContent';
 This guide demonstrates deploying [Llama 4](https://huggingface.co/meta-llama) models using [vLLM](https://github.com/vllm-project/vllm) with [NxD Inference](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/nxd-inference/) on [AWS Trainium2](https://aws.amazon.com/machine-learning/trainium/) instances.
 
 :::info
-This blueprint supports **EKS Auto Mode** for automatic Trainium2 node provisioning. EKS Auto Mode automatically manages the Neuron device plugin, eliminating manual driver installation.
+This blueprint uses **EKS Auto Mode** for automatic Trainium2 node provisioning. EKS Auto Mode natively supports Trn family instances (including trn2.48xlarge) - no separate NodePool or Karpenter configuration required. Auto Mode automatically manages the Neuron device plugin and enables SOCI parallel pull for faster container startup.
 :::
 
 ## Understanding Trainium2 Requirements
@@ -59,12 +59,12 @@ See the [NxD Inference Llama 4 Tutorial](https://awsdocs-neuron.readthedocs-host
 ### EKS Cluster Requirements
 
 - **EKS Version**: >= 1.30
-- **Trainium2 Node Group**: trn2.48xlarge instances
-- **Neuron Device Plugin**: Installed and configured
+- **EKS Auto Mode**: Enabled (recommended)
+- **Neuron Device Plugin**: Automatically managed by EKS Auto Mode
 
-### Create EKS Cluster with Trainium2 Support
+### Create EKS Cluster with Auto Mode
 
-You can use EKS Auto Mode for automatic Trainium2 node provisioning:
+EKS Auto Mode natively supports Trainium2 (Trn family) instances. No additional NodePool configuration is required - Auto Mode automatically provisions trn2.48xlarge nodes when workloads request Neuron devices.
 
 ```bash
 eksctl create cluster \
@@ -73,49 +73,24 @@ eksctl create cluster \
   --enable-auto-mode
 ```
 
-### Create Trainium NodePool for EKS Auto Mode
+:::tip No NodePool Required
+With EKS Auto Mode, you do NOT need to create a separate NodePool for Trainium2. When you deploy a workload requesting `aws.amazon.com/neuron` resources with the appropriate nodeSelector, Auto Mode automatically:
+- Provisions trn2.48xlarge instances
+- Installs and configures the Neuron device plugin
+- Applies SOCI parallel pull for faster container startup
+:::
+
+### Verify EKS Auto Mode is Enabled
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: karpenter.sh/v1
-kind: NodePool
-metadata:
-  name: trainium
-spec:
-  disruption:
-    budgets:
-      - nodes: 10%
-    consolidateAfter: 30s
-    consolidationPolicy: WhenEmptyOrUnderutilized
-  template:
-    spec:
-      expireAfter: 336h
-      nodeClassRef:
-        group: eks.amazonaws.com
-        kind: NodeClass
-        name: default
-      requirements:
-        - key: karpenter.sh/capacity-type
-          operator: In
-          values: ["on-demand"]
-        - key: node.kubernetes.io/instance-type
-          operator: In
-          values: ["trn2.48xlarge"]
-        - key: kubernetes.io/arch
-          operator: In
-          values: ["amd64"]
-        - key: kubernetes.io/os
-          operator: In
-          values: ["linux"]
-      taints:
-        - key: aws.amazon.com/neuron
-          effect: NoSchedule
-EOF
+aws eks describe-cluster --name llama4-trn2-cluster \
+  --query 'cluster.computeConfig.enabled'
 ```
 
-:::info
-EKS Auto Mode automatically manages the Neuron device plugin - no manual installation required!
-:::
+Expected output:
+```text
+true
+```
 
 ### Install Neuron Device Plugin (Only for non-Auto Mode clusters)
 
@@ -126,7 +101,9 @@ kubectl apply -f https://raw.githubusercontent.com/aws-neuron/aws-neuron-sdk/mas
 kubectl apply -f https://raw.githubusercontent.com/aws-neuron/aws-neuron-sdk/master/src/k8/k8s-neuron-scheduler-eks.yml
 ```
 
-### Verify Neuron Devices
+### Verify Neuron Devices (After Deployment)
+
+Once a Trainium2 node is provisioned, verify Neuron devices:
 
 ```bash
 kubectl get nodes -o json | jq '.items[].status.allocatable["aws.amazon.com/neuron"]'
@@ -382,13 +359,15 @@ helm uninstall llama4-maverick
 
 1. **Pre-compilation Required**: Unlike GPU deployments, Trainium2 requires model compilation before deployment.
 
-2. **Cost-Effective Inference**: Trainium2 provides excellent price-performance for large MoE models like Llama 4.
+2. **EKS Auto Mode Native Support**: No separate NodePool or Karpenter configuration needed - Auto Mode automatically provisions trn2.48xlarge instances when workloads request Neuron devices.
 
-3. **No Quantization Needed**: Trainium2's 1.5 TiB HBM memory supports full BF16 precision for both Scout and Maverick.
+3. **Cost-Effective Inference**: Trainium2 provides excellent price-performance for large MoE models like Llama 4.
 
-4. **Multimodal Support**: Llama 4 on Trainium2 supports both text and image inputs.
+4. **No Quantization Needed**: Trainium2's 1.5 TiB HBM memory supports full BF16 precision for both Scout and Maverick.
 
-5. **Helm-based Deployment**: Use the AI on EKS inference charts for standardized, reproducible deployments.
+5. **Multimodal Support**: Llama 4 on Trainium2 supports both text and image inputs.
+
+6. **Helm-based Deployment**: Use the AI on EKS inference charts for standardized, reproducible deployments.
 
 ## References
 
