@@ -14,12 +14,12 @@ locals {
 #---------------------------------------------------------------
 # Kube Prometheus Namespace
 #---------------------------------------------------------------
-# resource "kubernetes_namespace" "kube_prometheus_stack_namespace" {
-#   count = var.enable_kube_prometheus_stack ? 1 : 0
-#   metadata {
-#     name = "kube-prometheus-stack"
-#   }
-# }
+resource "kubernetes_namespace" "kube_prometheus_stack_namespace" {
+  count = var.enable_kube_prometheus_stack ? 1 : 0
+  metadata {
+    name = "kube-prometheus-stack"
+  }
+}
 #---------------------------------------------------------------
 # Grafana Admin Password
 #---------------------------------------------------------------
@@ -44,7 +44,10 @@ resource "kubernetes_secret" "grafana_admin" {
     admin-password = random_password.grafana[0].result
   }
 
-  depends_on = [kubectl_manifest.kube_prometheus_stack]
+  depends_on = [
+    kubectl_manifest.kube_prometheus_stack,
+    kubernetes_namespace.kube_prometheus_stack_namespace
+  ]
 }
 
 #---------------------------------------------------------------

@@ -342,6 +342,13 @@ variable "enable_cert_manager" {
   default     = false
 }
 
+# MariaDB Operator
+variable "enable_mariadb_operator" {
+  description = "Enable mariadb-operator addon"
+  type        = bool
+  default     = false
+}
+
 # Slinky Slurm Operator
 variable "enable_slurm_operator" {
   description = "Enable slurm-operator addon"

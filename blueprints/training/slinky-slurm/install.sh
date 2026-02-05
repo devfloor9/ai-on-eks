@@ -68,24 +68,12 @@ aws s3 cp llama2_7b-training.sbatch s3://${S3_BUCKET_NAME}/ --region $REGION
 # update local kubeconfig
 aws eks update-kubeconfig --name slurm-on-eks --region $REGION
 
-# Install MariaDB CRDs and Operator
-helm repo add mariadb-operator https://helm.mariadb.com/mariadb-operator
-helm repo update mariadb-operator
-helm install mariadb-operator-crds mariadb-operator/mariadb-operator-crds
-helm install mariadb-operator mariadb-operator/mariadb-operator \
-  --namespace mariadb --create-namespace
-
-# Wait for MariaDB operator webhook to be ready
-echo "Waiting for MariaDB operator webhook to be ready..."
-kubectl wait --for=condition=available --timeout=300s deployment/mariadb-operator -n mariadb
-sleep 30
-
 # Create MariaDB instance in Slurm namespace
 kubectl apply -f mariadb.yaml
 
 # Install Slurm Cluster
 helm install slurm oci://ghcr.io/slinkyproject/charts/slurm \
- --values=slurm-values.yaml --version=0.4.1 --namespace=slurm --create-namespace
+ --values=slurm-values.yaml --version=1.0.1 --namespace=slurm --create-namespace
 
 # Wait for the slurm-login service to exist
 until kubectl get service slurm-login-slinky -n slurm >/dev/null 2>&1; do

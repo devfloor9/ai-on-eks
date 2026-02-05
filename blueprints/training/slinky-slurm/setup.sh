@@ -2,7 +2,7 @@
 
 # Default values
 REPO_NAME="dlc-slurmd"
-IMAGE_TAG="25.05.0-ubuntu24.04"
+IMAGE_TAG="25.11.1-ubuntu24.04"
 AWS_REGION=$(aws configure get region || echo "us-west-2")
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 SKIP_IMAGE_BUILD=false
@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
     --help)
       echo "Usage: $0 [OPTIONS]"
       echo "      --repo-name    Repository name (default: dlc-slurmd)"
-      echo "      --tag          Image tag (default: 25.05.0-ubuntu24.04)"
+      echo "      --tag          Image tag (default: 25.11.1-ubuntu24.04)"
       echo "      --region       AWS region (default: AWS CLI configured region or us-west-2)"
       echo "      --skip-build   Skip image build (use existing image in ECR)"
       exit 0

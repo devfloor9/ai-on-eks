@@ -150,6 +150,16 @@ resource "kubectl_manifest" "cert_manager_yaml" {
   ]
 }
 
+# MariaDB Operator
+resource "kubectl_manifest" "mariadb_operator_yaml" {
+  count     = var.enable_mariadb_operator ? 1 : 0
+  yaml_body = file("${path.module}/argocd-addons/mariadb-operator.yaml")
+
+  depends_on = [
+    helm_release.argocd
+  ]
+}
+
 # Slinky Slurm Operator
 resource "kubectl_manifest" "slurm_operator_yaml" {
   count     = var.enable_slurm_operator ? 1 : 0

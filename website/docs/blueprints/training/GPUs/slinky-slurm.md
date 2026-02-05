@@ -30,7 +30,7 @@ This Slurm cluster includes the following components:
 | REST API (slurmrestd) | Offers HTTP-based API access to Slurm functionality for programmatic interaction with the cluster. |
 | Authentication (sackd) | Manages credential authentication for secure access to Slurm services. |
 | MariaDB | The database backend used by the accounting service to store job, user, and project information. |
-| Slurm Exporter | Collects and exports Slurm metrics for monitoring purposes. |
+| Prometheus Service Monitor | Configured within the controller to scrape metrics from scheduler, partition, node, and job endpoints for monitoring purposes. |
 
 When paired with Amazon EKS, the Slinky Project unlocks the ability for enterprises who have standardized infrastructure management on Kubernetes to deliver a Slurm-based experience to their ML scientists. It also enables training, experimentation, and inference to happen on the same cluster of accelerated nodes.
 
@@ -38,7 +38,7 @@ When paired with Amazon EKS, the Slinky Project unlocks the ability for enterpri
 
 ![alt text](../img/Slurm-on-EKS.png)
 
-The diagram above depicts the Slurm on EKS deployment outlined in this guide. An Amazon EKS cluster acts as an orchestration layer, with core Slurm Cluster components hosted on a managed node group of m5.xlarge instances, while a Karpenter NodePool manages the deployment of GPU accelerated compute nodes for the slurmd pods to run on. The Slinky Slurm operator and Slurm cluster are automatically deployed as ArgoCD applications.
+The diagram above depicts the Slurm on EKS deployment outlined in this guide. An Amazon EKS cluster acts as an orchestration layer, with core Slurm Cluster components hosted on a managed node group of m6i.xlarge instances, while a Karpenter NodePool manages the deployment of GPU accelerated compute nodes for the slurmd pods to run on. The Slinky Slurm operator and Slurm cluster are automatically deployed as ArgoCD applications.
 
 The login LoadBalancer type service is annotated to dynamically create an AWS Network Load Balancer using the [AWS Load Balancer Controller](https://github.com/kubernetes-sigs/aws-load-balancer-controller), allowing ML scientists to SSH into the login pod without interfacing with the Kubernetes API server via kubectl.
 
@@ -98,7 +98,7 @@ To customize this behavior, you can add the following optional flags:
 | Component | Description | Default Value|
 |-----------|-------------|-------------|
 |`--repo-name`| The name of the ECR repository |dlc-slurmd|
-|`--tag`|The image tag |25.05.0-ubuntu24.04|
+|`--tag`|The image tag |25.11.1-ubuntu24.04|
 |`--region`| The AWS region of your ECR repository | inferred from the AWS CLI configuration or set to `us-west-2`|
 |`--skip-build`| Set if using an existing image already in ECR | `false`|
 |`--skip-setup`| Set if you previously generate a `blueprints/training/slinky-slurm/slurm-values.yaml` file |`false`|
@@ -107,7 +107,7 @@ To customize this behavior, you can add the following optional flags:
 For example, if you've already built and pushed a custom slurmd container image to a custom ECR repository, add the following flags and values:
 ```bash
 cd ai-on-eks/blueprints/training/slinky-slurm
-./install.sh --repo-name dlc-slurmd --tag 25.05.0-ubuntu24.04 --skip-build
+./install.sh --repo-name dlc-slurmd --tag 25.11.1-ubuntu24.04 --skip-build
 ```
 The script will then validate that the container image exists in your ECR repo before proceeding.
 
@@ -161,40 +161,37 @@ kubectl get all -n slurm
 ```
 ```
 NAME                                      READY   STATUS    RESTARTS   AGE
-pod/mariadb-0                             1/1     Running   0          9m21s
-pod/slurm-accounting-0                    1/1     Running   0          9m14s
-pod/slurm-controller-0                    3/3     Running   0          9m14s
-pod/slurm-exporter-6ddbf6fcc5-xnxmg       1/1     Running   0          9m14s
-pod/slurm-login-slinky-5f56cdb67c-rjmnf   1/1     Running   0          9m13s
-pod/slurm-restapi-545ffcccb5-qqsgv        1/1     Running   0          9m13s
-pod/slurm-worker-slinky-0                 2/2     Running   0          9m13s
-pod/slurm-worker-slinky-1                 2/2     Running   0          9m13s
-pod/slurm-worker-slinky-2                 2/2     Running   0          9m13s
-pod/slurm-worker-slinky-3                 2/2     Running   0          9m13s
+pod/mariadb-0                             1/1     Running   0          9m12s
+pod/slurm-accounting-0                    1/1     Running   0          9m6s
+pod/slurm-controller-0                    3/3     Running   0          9m5s
+pod/slurm-login-slinky-65cdfdb557-2869l   1/1     Running   0          9m5s
+pod/slurm-restapi-5c6d784dbc-6nlcw        1/1     Running   0          9m5s
+pod/slurm-worker-slinky-0                 2/2     Running   0          9m5s
+pod/slurm-worker-slinky-1                 2/2     Running   0          9m5s
+pod/slurm-worker-slinky-2                 2/2     Running   0          9m5s
+pod/slurm-worker-slinky-3                 2/2     Running   0          9m5s
 
-NAME                         TYPE           CLUSTER-IP       EXTERNAL-IP                                                                  PORT(S)        AGE
-service/mariadb              ClusterIP      172.20.181.87    <none>                                                                       3306/TCP       9m22s
-service/mariadb-internal     ClusterIP      None             <none>                                                                       3306/TCP       9m22s
-service/slurm-accounting     ClusterIP      172.20.207.118   <none>                                                                       6819/TCP       9m15s
-service/slurm-controller     ClusterIP      172.20.157.64    <none>                                                                       6817/TCP       9m15s
-service/slurm-exporter       ClusterIP      None             <none>                                                                       8080/TCP       9m15s
-service/slurm-login-slinky   LoadBalancer   172.20.191.71    k8s-slurm-slurmlog-a06325b7ab-221460a1f496bf88.elb.us-west-2.amazonaws.com   22:31786/TCP   9m15s
-service/slurm-restapi        ClusterIP      172.20.145.217   <none>                                                                       6820/TCP       9m14s
+NAME                          TYPE           CLUSTER-IP       EXTERNAL-IP                                                                  PORT(S)        AGE
+service/mariadb               ClusterIP      172.20.165.187   <none>                                                                       3306/TCP       9m12s
+service/mariadb-internal      ClusterIP      None             <none>                                                                       3306/TCP       9m12s
+service/slurm-accounting      ClusterIP      172.20.206.252   <none>                                                                       6819/TCP       9m6s
+service/slurm-controller      ClusterIP      172.20.22.142    <none>                                                                       6817/TCP       9m5s
+service/slurm-login-slinky    LoadBalancer   172.20.155.154   k8s-slurm-slurmlog-d3c664afd2-5c3621e9c562ee2d.elb.us-west-2.amazonaws.com   22:31787/TCP   9m5s
+service/slurm-restapi         ClusterIP      172.20.130.229   <none>                                                                       6820/TCP       9m5s
+service/slurm-workers-slurm   ClusterIP      None             <none>                                                                       6818/TCP       9m5s
 
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/slurm-exporter       1/1     1            1           9m15s
-deployment.apps/slurm-login-slinky   1/1     1            1           9m14s
-deployment.apps/slurm-restapi        1/1     1            1           9m14s
+deployment.apps/slurm-login-slinky   1/1     1            1           9m6s
+deployment.apps/slurm-restapi        1/1     1            1           9m6s
 
 NAME                                            DESIRED   CURRENT   READY   AGE
-replicaset.apps/slurm-exporter-6ddbf6fcc5       1         1         1       9m15s
-replicaset.apps/slurm-login-slinky-5f56cdb67c   1         1         1       9m14s
-replicaset.apps/slurm-restapi-545ffcccb5        1         1         1       9m14s
+replicaset.apps/slurm-login-slinky-65cdfdb557   1         1         1       9m6s
+replicaset.apps/slurm-restapi-5c6d784dbc        1         1         1       9m6s
 
 NAME                                READY   AGE
-statefulset.apps/mariadb            1/1     9m22s
-statefulset.apps/slurm-accounting   1/1     9m15s
-statefulset.apps/slurm-controller   1/1     9m15s
+statefulset.apps/mariadb            1/1     9m13s
+statefulset.apps/slurm-accounting   1/1     9m7s
+statefulset.apps/slurm-controller   1/1     9m6s
 ```
 **1. Access the Slurm login Pod:**
 
@@ -222,17 +219,20 @@ Verify that the Amazon FSx for Lustre shared file system is mounted to the login
 df -h
 ```
 ```
-Filesystem                Size  Used Avail Use% Mounted on
-overlay                   100G  7.5G   93G   8% /
-tmpfs                      64M     0   64M   0% /dev
-/dev/nvme0n1p1            100G  7.5G   93G   8% /run
-10.1.0.194@tcp:/d2kbdb4v  2.3T   16M  2.3T   1% /fsx
-tmpfs                      15G  4.0K   15G   1% /etc/slurm
-shm                        64M     0   64M   0% /dev/shm
-tmpfs                      15G  4.0K   15G   1% /etc/sssd/sssd.conf
-tmpfs                      15G   12K   15G   1% /etc/ssh/ssh_host_rsa_key
-tmpfs                     7.7G     0  7.7G   0% /proc/acpi
-tmpfs                     7.7G     0  7.7G   0% /sys/firmware
+Filesystem               Size  Used Avail Use% Mounted on
+overlay                   20G  8.9G   12G  45% /
+tmpfs                     64M     0   64M   0% /dev
+/dev/root                307M  307M     0 100% /usr/local/sbin/modprobe
+10.1.0.61@tcp:/we427b4v  2.3T   16M  2.3T   1% /fsx
+/dev/nvme1n1p1            20G  8.9G   12G  45% /etc/hosts
+tmpfs                     15G  4.0K   15G   1% /etc/slurm
+tmpfs                     15G  4.0K   15G   1% /run/slurm
+shm                       64M     0   64M   0% /dev/shm
+tmpfs                     15G   24K   15G   1% /etc/ssh/ssh_host_rsa_key
+tmpfs                     15G  8.0K   15G   1% /etc/ssh/sshd_config
+tmpfs                     15G  4.0K   15G   1% /etc/sssd/sssd.conf
+tmpfs                    7.7G     0  7.7G   0% /proc/acpi
+tmpfs                    7.7G     0  7.7G   0% /sys/firmware
 ```
 Exit back to your machine:
 ```
@@ -249,17 +249,17 @@ Verify that the Amazon FSx for Lustre shared file system is mounted to the login
 df -h
 ```
 ```
-overlay                   838G   43G  795G   6% /
-tmpfs                      64M     0   64M   0% /dev
-/dev/root                 798M  798M     0 100% /usr/local/sbin/modprobe
-/dev/nvme2n1              838G   43G  795G   6% /run
-10.1.0.194@tcp:/d2kbdb4v  2.3T   16M  2.3T   1% /fsx
-tmpfs                     122G  4.0K  122G   1% /etc/slurm
-tmpfs                      63G     0   63G   0% /dev/shm
-tmpfs                     122G  8.0K  122G   1% /var/spool/slurmd
-tmpfs                     122G     0  122G   0% /var/log/slurm
-tmpfs                      63G   12K   63G   1% /proc/driver/nvidia
-tmpfs                      25G  3.9M   25G   1% /run/nvidia-persistenced/socket
+Filesystem               Size  Used Avail Use% Mounted on
+overlay                  3.5T   95G  3.4T   3% /
+tmpfs                     64M     0   64M   0% /dev
+10.1.0.61@tcp:/we427b4v  2.3T   16M  2.3T   1% /fsx
+tmpfs                    366G  4.0K  366G   1% /etc/slurm
+tmpfs                    187G     0  187G   0% /dev/shm
+/dev/nvme2n1             3.5T   95G  3.4T   3% /etc/hosts
+tmpfs                    366G     0  366G   0% /var/log/slurm
+tmpfs                     75G  4.4M   75G   1% /run/nvidia-persistenced/socket
+/dev/root                905M  905M     0 100% /usr/bin/nvidia-smi
+/dev/nvme0n1p1           300G  6.1G  294G   3% /var/lib/dcgm-exporter/job-mapping
 ```
 Check the installed CUDA compiler version on compute node pods:
 ```
@@ -286,13 +286,13 @@ fi_info -p efa
 ```
 provider: efa
     fabric: efa
-    domain: rdmap0s29-rdm
+    domain: rdmap0s26-rdm
     version: 122.0
     type: FI_EP_RDM
     protocol: FI_PROTO_EFA
 provider: efa
     fabric: efa
-    domain: rdmap0s29-dgrm
+    domain: rdmap0s26-dgrm
     version: 122.0
     type: FI_EP_DGRAM
     protocol: FI_PROTO_EFA
@@ -359,7 +359,7 @@ Make a new directory for your checkpoints
 mkdir -p checkpoints
 ```
 :::info
-By default the `llama2_7b-training.sbatch` batch training script is configured to distribute the FSDP workload across 4 nodes. The Slurm NodeSet maps to the `g5-nvidia` NodePool via the `karpenter.sh/nodepool` nodeSelector. If Karpenter is unable to find 4 on-demand or spot instances, you may need to make adjustment to the batch training script, then upload a new copy to your provisioned S3 bucket, which will sync it to the FSx for Lustre file system via a [data repository association](https://docs.aws.amazon.com/fsx/latest/LustreGuide/create-dra-linked-data-repo.html):
+By default the `llama2_7b-training.sbatch` batch training script is configured to distribute the FSDP workload across 4 `g5.8xlarge` nodes. The Slurm NodeSet maps to the `g5-nvidia` NodePool via the `karpenter.sh/nodepool` nodeSelector. If Karpenter is unable to find 4 on-demand or spot instances, you may need to make adjustment to the batch training script, then upload a new copy to your provisioned S3 bucket, which will sync it to the FSx for Lustre file system via a [data repository association](https://docs.aws.amazon.com/fsx/latest/LustreGuide/create-dra-linked-data-repo.html):
 ```
 cd ../../../infra/slinky-slurm/terraform/_LOCAL
 S3_BUCKET_NAME=$(terraform output -raw fsx_s3_bucket_name)
@@ -383,7 +383,14 @@ NEW_TOKEN="<you-token-here>"
 ```
 sed -i "s/export HF_TOKEN=.*$/export HF_TOKEN=$NEW_TOKEN/" llama2_7b-training.sbatch
 ```
-**2. Start the training job:**
+**2. Configure DataLoader for Containerized Environment:**
+
+When running in this Kubernetes-based Slurm setup, the DataLoader needs to use spawn-based multiprocessing instead of the default fork method. This ensures proper CUDA initialization within the containerized worker processes. For this, we'll add `multiprocessing_context='spawn'` to the DataLoader defined in the `train_utils.py` file.
+
+```
+sed -i "s/timeout=600)/timeout=600, multiprocessing_context='spawn')/" ../src/model_utils/train_utils.py
+```
+**3. Start the training job:**
 
 Submit the batch training script to the Slurm Controller using the [sbatch](https://slurm.schedmd.com/sbatch.html) command:
 ```
@@ -392,7 +399,7 @@ sbatch llama2_7b-training.sbatch
 ```
 Submitted batch job 1
 ```
-**3. Monitor trianing progess:**
+**4. Monitor trianing progess:**
 
 Watch the output logs from the login pod:
 ```
@@ -412,7 +419,7 @@ tail -f logs/llama2_7b-FSDP_${JOB_ID}.out
 3: node-2:278:278 [0] NCCL INFO Broadcast: opCount 1608 sendbuff 0x302287400 recvbuff 0x302287400 count 1 datatype 4 op 0 root 0 comm 0x5611d45babf0 [nranks=4] stream 0x5611d3327480
 1: node-3:278:278 [0] NCCL INFO Broadcast: opCount 1609 sendbuff 0x302287600 recvbuff 0x302287600 count 3145 datatype 1 op 0 root 0 comm 0x555e2c6387e0 [nranks=4] stream 0x555e2b3a4370
 ```
-Watch the error logs from `slurm-worker-slinky-0` (in a new terminal window):
+Watch for batch and loss from `slurm-worker-slinky-0` (in a new terminal window):
 ```
 kubectl -n slurm exec -it pod/slurm-worker-slinky-0 -- bash --login
 ```
@@ -420,19 +427,37 @@ kubectl -n slurm exec -it pod/slurm-worker-slinky-0 -- bash --login
 cd /fsx/awsome-distributed-training/3.test_cases/pytorch/FSDP/slurm
 export JOB_ID=$(squeue -h -u root -o "%i" | head -1)
 
-watch "grep 'Batch.*Loss' logs/llama2_7b-FSDP_${JOB_ID}.err"
+watch "grep 'Batch.*Loss' logs/llama2_7b-FSDP_${JOB_ID}.out"
 ```
 ```
-2: 2025-07-17 13:14:16 I [train.py:103] Batch 0 Loss: 11.11333, Speed: 0.78 samples/sec, lr: 0.000031
-2: 2025-07-17 13:14:16 I [train.py:103] Batch 1 Loss: 11.03250, Speed: 5.84 samples/sec, lr: 0.000063
-2: 2025-07-17 13:14:17 I [train.py:103] Batch 2 Loss: 10.93887, Speed: 5.81 samples/sec, lr: 0.000094
-2: 2025-07-17 13:14:18 I [train.py:103] Batch 3 Loss: 10.66936, Speed: 5.87 samples/sec, lr: 0.000100
-2: 2025-07-17 13:14:18 I [train.py:103] Batch 4 Loss: 10.24629, Speed: 5.83 samples/sec, lr: 0.000100
-2: 2025-07-17 13:14:19 I [train.py:103] Batch 5 Loss: 10.05146, Speed: 5.87 samples/sec, lr: 0.000100
-2: 2025-07-17 13:14:20 I [train.py:103] Batch 6 Loss: 9.88661, Speed: 5.91 samples/sec, lr: 0.000100
-2: 2025-07-17 13:14:20 I [train.py:103] Batch 7 Loss: 9.78694, Speed: 5.87 samples/sec, lr: 0.000100
-2: 2025-07-17 13:14:21 I [train.py:103] Batch 8 Loss: 9.61180, Speed: 5.90 samples/sec, lr: 0.000100
-2: 2025-07-17 13:14:22 I [train.py:103] Batch 9 Loss: 9.34421, Speed: 5.83 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:23,797 [INFO] __main__: Batch 0 Loss: 11.07265, Speed: 1.17 samples/sec, lr: 0.000031
+2: 2026-01-16 06:33:24,456 [INFO] __main__: Batch 1 Loss: 11.05403, Speed: 6.08 samples/sec, lr: 0.000063
+2: 2026-01-16 06:33:25,111 [INFO] __main__: Batch 2 Loss: 10.88060, Speed: 6.11 samples/sec, lr: 0.000094
+2: 2026-01-16 06:33:25,765 [INFO] __main__: Batch 3 Loss: 10.60247, Speed: 6.12 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:26,422 [INFO] __main__: Batch 4 Loss: 10.19984, Speed: 6.09 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:27,080 [INFO] __main__: Batch 5 Loss: 9.90466, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:27,733 [INFO] __main__: Batch 6 Loss: 9.80892, Speed: 6.14 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:28,388 [INFO] __main__: Batch 7 Loss: 9.69072, Speed: 6.11 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:29,046 [INFO] __main__: Batch 8 Loss: 9.57264, Speed: 6.09 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:29,703 [INFO] __main__: Batch 9 Loss: 9.37485, Speed: 6.09 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:30,357 [INFO] __main__: Batch 10 Loss: 9.25147, Speed: 6.11 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:31,010 [INFO] __main__: Batch 11 Loss: 9.27672, Speed: 6.13 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:31,669 [INFO] __main__: Batch 12 Loss: 9.16106, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:32,328 [INFO] __main__: Batch 13 Loss: 9.02550, Speed: 6.07 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:32,981 [INFO] __main__: Batch 14 Loss: 8.93448, Speed: 6.14 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:33,639 [INFO] __main__: Batch 15 Loss: 8.83249, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:34,300 [INFO] __main__: Batch 16 Loss: 8.68732, Speed: 6.05 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:34,957 [INFO] __main__: Batch 17 Loss: 8.85516, Speed: 6.09 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:35,616 [INFO] __main__: Batch 18 Loss: 8.63410, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:36,274 [INFO] __main__: Batch 19 Loss: 8.46158, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:36,926 [INFO] __main__: Batch 20 Loss: 8.60995, Speed: 6.14 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:37,591 [INFO] __main__: Batch 21 Loss: 8.39657, Speed: 6.02 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:38,246 [INFO] __main__: Batch 22 Loss: 8.26141, Speed: 6.11 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:38,902 [INFO] __main__: Batch 23 Loss: 8.25075, Speed: 6.10 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:39,561 [INFO] __main__: Batch 24 Loss: 8.46888, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:40,218 [INFO] __main__: Batch 25 Loss: 8.16549, Speed: 6.08 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:40,870 [INFO] __main__: Batch 26 Loss: 8.17494, Speed: 6.14 samples/sec, lr: 0.000100
+2: 2026-01-16 06:33:41,528 [INFO] __main__: Batch 27 Loss: 7.95398, Speed: 6.09 samples/sec, lr: 0.000100
 ```
 Watch squeue from `slurm-worker-slinky-1` (in a new terminal window):
 ```

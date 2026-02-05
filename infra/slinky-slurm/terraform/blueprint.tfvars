@@ -3,12 +3,12 @@ enable_aws_fsx_csi_driver        = true
 deploy_fsx_volume                = true
 fsx_pvc_namespace                = "slurm"
 enable_aws_efa_k8s_device_plugin = true
-enable_argocd                    = true
 enable_cert_manager              = true
+enable_mariadb_operator          = true
 enable_kube_prometheus_stack     = true
 enable_slurm_operator            = true
-enable_ingress_nginx             = false
 enable_service_mutator_webhook   = true
+enable_nvidia_gpu_operator       = true
 # region                         = "us-west-2"
 # eks_cluster_version            = "1.34"
 

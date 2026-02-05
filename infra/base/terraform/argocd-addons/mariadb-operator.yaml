@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cert-manager
+  name: mariadb-operator
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -9,11 +9,11 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: cert-manager
+    namespace: mariadb
   source:
-    repoURL: https://charts.jetstack.io
-    chart: cert-manager
-    targetRevision: v1.19.2
+    repoURL: https://mariadb-operator.github.io/mariadb-operator
+    chart: mariadb-operator
+    targetRevision: "25.10.4"
     helm:
       parameters:
         - name: crds.enabled

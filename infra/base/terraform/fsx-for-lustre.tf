@@ -161,7 +161,7 @@ resource "kubernetes_namespace" "fsx_namespace" {
 }
 
 resource "kubernetes_persistent_volume_claim_v1" "fsx" {
-  count = var.enable_jupyterhub ? 1 : 0
+  count = var.deploy_fsx_volume ? 1 : 0
   metadata {
     name      = "fsx-static-pvc"
     namespace = var.fsx_pvc_namespace
