@@ -79,8 +79,8 @@ variable "enable_eks_auto_mode" {
 
 variable "allowed_inbound_cidrs" {
   description = "Comma separated string of allowed inbound CIDRs. Used for ingress deployments to restrict access on the load balancer."
-  type = string
-  default = "0.0.0.0/0"
+  type        = string
+  default     = "0.0.0.0/0"
 }
 
 # EKS Addons
