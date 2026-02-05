@@ -49,12 +49,12 @@ This infrastructure creates:
 | Component                                                                         | Version | Purpose                                                   |
 |-----------------------------------------------------------------------------------|---------|-----------------------------------------------------------|
 | [GitLab](https://about.gitlab.com/)                                               | 9.1.6   | Source control, container registry, and CI/CD pipelines   |
-| [Langfuse](https://langfuse.com/)                                                 | 1.5.9   | LLM observability, tracing, prompt management, evaluation |
+| [Langfuse](https://langfuse.com/)                                                 | 3.124.1 | LLM observability, tracing, prompt management, evaluation |
 | [Milvus](https://milvus.io/)                                                      | 2.6.4   | Vector database for embeddings and similarity search      |
 | [MCP Gateway Registry](https://github.com/agentic-community/mcp-gateway-registry) | Latest  | Discovery and management of MCP servers                   |
-| [ArgoCD](https://argo-cd.readthedocs.io/)                                         | Latest  | GitOps continuous delivery                                |
+| [ArgoCD](https://argo-cd.readthedocs.io/)                                         | 3.0.6   | GitOps continuous delivery                                |
 | [Karpenter](https://karpenter.sh/)                                                | 1.8.1   | Kubernetes node autoscaling                               |
-| [External DNS](https://github.com/kubernetes-sigs/external-dns)                   | Latest  | Automatic DNS record management                           |
+| [External DNS](https://github.com/kubernetes-sigs/external-dns)                   | 0.19.0  | Automatic DNS record management                           |
 
 ### GitLab
 
