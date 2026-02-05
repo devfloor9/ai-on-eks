@@ -268,7 +268,7 @@ kubectl logs -n langfuse -l app.kubernetes.io/name=langfuse
 ### DNS Records Not Created
 
 ```bash
-kubectl logs -n kube-system -l app.kubernetes.io/name=external-dns
+kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
 ```
 
 ### Certificate Issues
