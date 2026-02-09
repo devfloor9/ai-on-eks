@@ -97,9 +97,8 @@ resource "kubectl_manifest" "nvidia_nim_yaml" {
 }
 
 # NVIDIA K8s DRA Driver
-# NVIDIA K8s DRA Driver
 resource "kubectl_manifest" "nvidia_dra_driver" {
-  count     = var.enable_nvidia_dra_driver && var.enable_nvidia_gpu_operator && !var.enable_eks_auto_mode ? 1 : 0
+  count     = var.enable_nvidia_dra_driver && var.enable_nvidia_gpu_operator ? 1 : 0
   yaml_body = file("${path.module}/argocd-addons/nvidia-dra-driver.yaml")
 
   depends_on = [
@@ -109,7 +108,7 @@ resource "kubectl_manifest" "nvidia_dra_driver" {
 
 # GPU Operator
 resource "kubectl_manifest" "nvidia_gpu_operator" {
-  count = var.enable_nvidia_gpu_operator && !var.enable_eks_auto_mode ? 1 : 0
+  count = var.enable_nvidia_gpu_operator ? 1 : 0
   yaml_body = templatefile("${path.module}/argocd-addons/nvidia-gpu-operator.yaml", {
     service_monitor_enabled = var.enable_ai_ml_observability_stack
   })
@@ -131,7 +130,7 @@ resource "kubectl_manifest" "nvidia_device_plugin" {
 
 # DCGM Exporter (standalone - GPU monitoring only)
 resource "kubectl_manifest" "nvidia_dcgm_exporter" {
-  count = !var.enable_nvidia_gpu_operator && var.enable_nvidia_dcgm_exporter && !var.enable_eks_auto_mode ? 1 : 0
+  count = !var.enable_nvidia_gpu_operator && var.enable_nvidia_dcgm_exporter ? 1 : 0
   yaml_body = templatefile("${path.module}/argocd-addons/nvidia-dcgm-exporter.yaml", {
     service_monitor_enabled = var.enable_ai_ml_observability_stack
   })
