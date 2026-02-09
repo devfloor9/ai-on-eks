@@ -450,6 +450,7 @@ resource "kubernetes_ingress_class_v1" "automode" {
     }
   }
   depends_on = [
-    kubectl_manifest.automode_ingressclass_params
+    kubectl_manifest.automode_ingressclass_params,
+    module.eks
   ]
 }
