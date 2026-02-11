@@ -5,4 +5,4 @@ enable_aws_efa_k8s_device_plugin = true # Required for NVIDIA Dynamo high-perfor
 enable_ai_ml_observability_stack = true
 dynamo_stack_version             = "v0.5.0"
 # region                           = "us-west-2"  # Uncomment to override default
-# eks_cluster_version              = "1.33"  # Uncomment to override default
+# eks_cluster_version              = "1.34"  # Uncomment to override default

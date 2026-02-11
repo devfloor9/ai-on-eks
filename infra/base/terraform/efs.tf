@@ -7,7 +7,7 @@
 module "efs" {
   count   = var.enable_aws_efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/efs/aws"
-  version = "~> 1.6"
+  version = "~> 1.8"
 
   creation_token = local.name
   name           = local.name
@@ -54,7 +54,7 @@ resource "kubernetes_storage_class_v1" "efs" {
   ]
 
   depends_on = [
-    module.eks_blueprints_addons.aws_efs_csi_driver,
+    aws_eks_addon.aws_efs_csi_driver,
     module.efs
   ]
 }

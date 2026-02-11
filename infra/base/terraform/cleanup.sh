@@ -3,6 +3,10 @@
 TERRAFORM_COMMAND="terraform destroy -auto-approve"
 CLUSTERNAME="ai-stack"
 REGION="region"
+
+# Get the deployment_id from terraform output
+DEPLOYMENT_NAME=$(terraform output -raw deployment_name)
+
 # Check if blueprint.tfvars exists
 if [ -f "../blueprint.tfvars" ]; then
   TERRAFORM_COMMAND="$TERRAFORM_COMMAND -var-file=../blueprint.tfvars"
@@ -25,71 +29,24 @@ fi
 
 
 # List of Terraform modules to destroy in sequence
-targets=(
-  "module.data_addons"
-  "module.eks_blueprints_addons"
-  "module.eks"
-)
+targets=($(terraform state list | grep "kubectl_manifest\." | grep -v "kubectl_manifest.aws_load_balancer_controller"))
 
-# Destroy modules in sequence
-for target in "${targets[@]}"
-do
-  echo "Destroying module $target..."
-  destroy_output=$($TERRAFORM_COMMAND -target="$target" 2>&1 | tee /dev/tty)
+# Destroy all kubectl_manifest resources at once (excluding aws_load_balancer_controller)
+if [ ${#targets[@]} -gt 0 ]; then
+  echo "Destroying kubectl_manifest resources..."
+  target_args=""
+  for target in "${targets[@]}"; do
+    target_args="$target_args -target=$target"
+  done
+
+  destroy_output=$($TERRAFORM_COMMAND $target_args 2>&1 | tee /dev/tty)
   if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete"* ]]; then
-    echo "SUCCESS: Terraform destroy of $target completed successfully"
+    echo "SUCCESS: Terraform destroy of kubectl_manifest resources completed successfully"
   else
-    echo "FAILED: Terraform destroy of $target failed"
+    echo "FAILED: Terraform destroy of kubectl_manifest resources failed"
     exit 1
   fi
-done
-
-echo "Destroying Load Balancers..."
-
-for arn in $(aws resourcegroupstaggingapi get-resources \
-  --resource-type-filters elasticloadbalancing:loadbalancer \
-  --tag-filters "Key=elbv2.k8s.aws/cluster,Values=$CLUSTERNAME" \
-  --query 'ResourceTagMappingList[].ResourceARN' \
-  --region $REGION \
-  --output text); do \
-    aws elbv2 delete-load-balancer --region $REGION --load-balancer-arn "$arn"; \
-  done
-
-echo "Destroying Target Groups..."
-for arn in $(aws resourcegroupstaggingapi get-resources \
-  --resource-type-filters elasticloadbalancing:targetgroup \
-  --tag-filters "Key=elbv2.k8s.aws/cluster,Values=$CLUSTERNAME" \
-  --query 'ResourceTagMappingList[].ResourceARN' \
-  --region $REGION \
-  --output text); do \
-    aws elbv2 delete-target-group --region $REGION --target-group-arn "$arn"; \
-  done
-
-echo "Destroying Security Groups..."
-for sg in $(aws ec2 describe-security-groups \
-  --filters "Name=tag:elbv2.k8s.aws/cluster,Values=$CLUSTERNAME" \
-  --region $REGION \
-  --query 'SecurityGroups[].GroupId' --output text); do \
-    aws ec2 delete-security-group --no-cli-pager --region $REGION --group-id "$sg"; \
-  done
-
-# List of Terraform modules to destroy in sequence
-targets=(
-  "module.vpc"
-)
-
-# Destroy modules in sequence
-for target in "${targets[@]}"
-do
-  echo "Destroying module $target..."
-  destroy_output=$($TERRAFORM_COMMAND -target="$target" 2>&1 | tee /dev/tty)
-  if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete"* ]]; then
-    echo "SUCCESS: Terraform destroy of $target completed successfully"
-  else
-    echo "FAILED: Terraform destroy of $target failed"
-    exit 1
-  fi
-done
+fi
 
 ## Final destroy to catch any remaining resources
 echo "Destroying remaining resources..."
@@ -99,4 +56,22 @@ if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete"* ]]; then
 else
   echo "FAILED: Terraform destroy of all modules failed"
   exit 1
+fi
+
+echo "Cleaning up PVCs and EBS volumes for deployment: $DEPLOYMENT_NAME"
+
+# Get the list of EBS volumes with the Blueprint tag
+VOLUME_IDS=$(aws ec2 describe-volumes --region "$REGION" --filters "Name=tag:Blueprint,Values=$DEPLOYMENT_NAME" --query "Volumes[].VolumeId" --output text)
+
+if [ -n "$VOLUME_IDS" ]; then
+  for volume_id in $VOLUME_IDS; do
+    # Get the PVC name from the volume tags
+    PVC_NAME=$(aws ec2 describe-volumes --region "$REGION" --volume-ids "$volume_id" --query "Volumes[0].Tags[?Key=='kubernetes.io/created-for/pvc/name'].Value" --output text)
+    PVC_NAMESPACE=$(aws ec2 describe-volumes --region "$REGION" --volume-ids "$volume_id" --query "Volumes[0].Tags[?Key=='kubernetes.io/created-for/pvc/namespace'].Value" --output text)
+
+    echo "Deleting EBS volume: $volume_id, PVC: ${PVC_NAME}, Namespace: ${PVC_NAMESPACE}"
+    aws ec2 delete-volume --region "$REGION" --volume-id "$volume_id"
+  done
+else
+  echo "No EBS volumes found for deployment : $DEPLOYMENT_NAME"
 fi

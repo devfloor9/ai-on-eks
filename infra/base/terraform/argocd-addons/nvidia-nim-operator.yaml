@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: nim-operator
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:

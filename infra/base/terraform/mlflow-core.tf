@@ -1,15 +1,29 @@
+locals {
+  mlflow_values = templatefile("${path.module}/helm-values/mlflow-tracking-values.yaml", {
+    mlflow_sa   = local.mlflow_service_account
+    mlflow_irsa = try(module.mlflow_pod_identity[0].iam_role_arn, "")
+    # MLflow Postgres RDS Config
+    mlflow_db_username = local.mlflow_name
+    mlflow_db_password = try(sensitive(aws_secretsmanager_secret_version.postgres[0].secret_string), "")
+    mlflow_db_name     = try(module.db[0].db_instance_name, "")
+    mlflow_db_host     = try(element(split(":", module.db[0].db_instance_endpoint), 0), "")
+    # S3 bucket config for artifacts
+    s3_bucket_name = try(module.mlflow_s3_bucket[0].s3_bucket_id, "")
+  })
+}
+
 #---------------------------------------------------------------
 # RDS Postgres Database for MLflow Backend
 #---------------------------------------------------------------
 module "db" {
   count   = var.enable_mlflow_tracking ? 1 : 0
   source  = "terraform-aws-modules/rds/aws"
-  version = "~> 5.0"
+  version = "~> 6.13"
 
   identifier = local.mlflow_name
 
   engine               = "postgres"
-  engine_version       = "14.13"
+  engine_version       = "14.17"
   family               = "postgres14"
   major_engine_version = "14"
   instance_class       = "db.m6i.xlarge"
@@ -18,11 +32,11 @@ module "db" {
   allocated_storage = 100
   iops              = 3000
 
-  db_name                = local.mlflow_name
-  username               = local.mlflow_name
-  create_random_password = false
-  password               = sensitive(aws_secretsmanager_secret_version.postgres[0].secret_string)
-  port                   = 5432
+  db_name                     = local.mlflow_name
+  username                    = local.mlflow_name
+  manage_master_user_password = false
+  password                    = sensitive(aws_secretsmanager_secret_version.postgres[0].secret_string)
+  port                        = 5432
 
   multi_az               = true
   db_subnet_group_name   = module.vpc.database_subnet_group
@@ -72,6 +86,7 @@ resource "aws_secretsmanager_secret" "postgres" {
   count                   = var.enable_mlflow_tracking ? 1 : 0
   name                    = local.mlflow_name
   recovery_window_in_days = 0 # Set to zero for this example to force delete during Terraform destroy
+  tags                    = local.tags
 }
 
 resource "aws_secretsmanager_secret_version" "postgres" {
@@ -86,7 +101,7 @@ resource "aws_secretsmanager_secret_version" "postgres" {
 module "security_group" {
   count   = var.enable_mlflow_tracking ? 1 : 0
   source  = "terraform-aws-modules/security-group/aws"
-  version = "~> 5.0"
+  version = "~> 5.3"
 
   name        = local.name
   description = "Complete PostgreSQL example security group"
@@ -106,7 +121,6 @@ module "security_group" {
   tags = local.tags
 }
 
-
 #---------------------------------------------------------------
 # S3 bucket for MLflow artifacts
 #---------------------------------------------------------------
@@ -115,7 +129,7 @@ module "security_group" {
 module "mlflow_s3_bucket" {
   count   = var.enable_mlflow_tracking ? 1 : 0
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 3.0"
+  version = "~> 5.7"
 
   bucket_prefix = "${local.name}-artifacts-"
 
@@ -149,53 +163,29 @@ resource "kubernetes_namespace_v1" "mlflow" {
 resource "kubernetes_service_account_v1" "mlflow" {
   count = var.enable_mlflow_tracking ? 1 : 0
   metadata {
-    name        = local.mlflow_service_account
-    namespace   = kubernetes_namespace_v1.mlflow[0].metadata[0].name
-    annotations = { "eks.amazonaws.com/role-arn" : module.mlflow_irsa[0].iam_role_arn }
-  }
-
-  automount_service_account_token = true
-}
-
-resource "kubernetes_secret_v1" "mlflow" {
-  count = var.enable_mlflow_tracking ? 1 : 0
-  metadata {
-    name      = "${local.mlflow_service_account}-secret"
+    name      = local.mlflow_service_account
     namespace = kubernetes_namespace_v1.mlflow[0].metadata[0].name
-    annotations = {
-      "kubernetes.io/service-account.name"      = kubernetes_service_account_v1.mlflow[0].metadata[0].name
-      "kubernetes.io/service-account.namespace" = kubernetes_namespace_v1.mlflow[0].metadata[0].name
-    }
   }
-
-  type = "kubernetes.io/service-account-token"
 }
 
-# Create IAM Role for Service Account (IRSA) Only if MLflow is enabled
-module "mlflow_irsa" {
-  count = var.enable_mlflow_tracking ? 1 : 0
+module "mlflow_pod_identity" {
+  count   = var.enable_mlflow_tracking ? 1 : 0
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 2.2"
 
-  source  = "aws-ia/eks-blueprints-addon/aws"
-  version = "~> 1.0" #ensure to update this to the latest/desired version
+  name = "mlflow-pod-identity"
 
-  # Disable helm release
-  create_release = false
+  additional_policy_arns = {
+    mlflow_policy = aws_iam_policy.mlflow[0].arn
+  }
 
-  # IAM role for service account (IRSA)
-  create_role   = true
-  create_policy = false # Policy is created in the next resource
-
-  role_name     = local.mlflow_service_account
-  role_policies = { mlflow_policy = aws_iam_policy.mlflow[0].arn }
-
-  oidc_providers = {
-    this = {
-      provider_arn    = module.eks.oidc_provider_arn
-      namespace       = kubernetes_namespace_v1.mlflow[0].metadata[0].name
+  associations = {
+    mlflow = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = local.mlflow_namespace
       service_account = local.mlflow_service_account
     }
   }
-
   tags = local.tags
 }
 
@@ -209,6 +199,7 @@ resource "aws_iam_policy" "mlflow" {
   name_prefix = format("%s-%s-", local.name, "mlflow")
   path        = "/"
   policy      = data.aws_iam_policy_document.mlflow[0].json
+  tags        = local.tags
 }
 
 data "aws_iam_policy_document" "mlflow" {
@@ -234,12 +225,30 @@ data "aws_iam_policy_document" "mlflow" {
     ]
   }
   statement {
-    sid       = ""
-    effect    = "Allow"
-    resources = ["arn:${local.partition}:rds-db:${local.region}:${local.account_id}:dbuser:${module.db[0].db_instance_name}/${local.mlflow_name}"]
+    sid    = ""
+    effect = "Allow"
+    resources = [
+      "arn:${local.partition}:rds-db:${local.region}:${local.account_id}:dbuser:${module.db[0].db_instance_name}/${local.mlflow_name}"
+    ]
 
     actions = [
       "rds-db:connect",
     ]
   }
+}
+
+resource "kubectl_manifest" "mlflow_tracking_server" {
+  count = var.enable_mlflow_tracking ? 1 : 0
+  yaml_body = templatefile("${path.module}/argocd-addons/mlflow-tracking-server.yaml", {
+    mlflow_namespace = try(kubernetes_namespace_v1.mlflow[0].metadata[0].name, local.mlflow_namespace)
+    user_values_yaml = indent(8, local.mlflow_values)
+  })
+
+  depends_on = [
+    helm_release.argocd,
+    aws_secretsmanager_secret_version.postgres,
+    module.mlflow_pod_identity,
+    module.mlflow_s3_bucket,
+    module.db
+  ]
 }

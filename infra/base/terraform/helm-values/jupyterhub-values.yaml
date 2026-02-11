@@ -19,6 +19,8 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
       service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
 singleuser:
+  cloudMetadata:
+    blockWithIptables: false # does not work on bottlerocket
   image:
     name: public.ecr.aws/h3o5n2r0/gpu-jupyter
     tag: v1.5_cuda-11.6_ubuntu-20.04_python-only

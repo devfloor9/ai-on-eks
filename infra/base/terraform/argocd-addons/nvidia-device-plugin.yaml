@@ -17,7 +17,7 @@ spec:
       values: |
         # Target only GPU nodes with accelerator: nvidia label
         nodeSelector:
-          accelerator: nvidia
+          karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
 
         # Enable GPU Feature Discovery (default: false)
         gfd:
@@ -25,21 +25,21 @@ spec:
 
         # Configure Node Feature Discovery components
         nfd:
+          enableNodeFeatureApi: true
           gc:
             nodeSelector:
-              accelerator: nvidia
+              karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
           topologyUpdater:
             nodeSelector:
-              accelerator: nvidia
+              karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
           worker:
             nodeSelector:
-              accelerator: nvidia
+              karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
             tolerations:
               - key: nvidia.com/gpu
                 operator: Exists
                 effect: NoSchedule
               - operator: "Exists"
-
   destination:
     server: https://kubernetes.default.svc
     namespace: nvidia-device-plugin

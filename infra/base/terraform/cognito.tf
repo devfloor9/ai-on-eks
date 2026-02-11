@@ -21,6 +21,7 @@ resource "aws_iam_role" "iam_for_lambda" {
   count              = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0
   name               = "iam_for_lambda"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  tags               = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
@@ -61,6 +62,7 @@ resource "aws_lambda_function" "pretoken_trigger" {
   handler = "index.handler"
 
   role = aws_iam_role.iam_for_lambda[0].arn
+  tags = local.tags
 }
 
 #---------------------------------------------------------------
@@ -82,6 +84,7 @@ resource "aws_cognito_user_pool" "pool" {
   lambda_config {
     pre_token_generation = aws_lambda_function.pretoken_trigger[0].arn
   }
+  tags = local.tags
 }
 
 resource "aws_cognito_user_pool_domain" "domain" {
@@ -124,23 +127,27 @@ resource "aws_cognito_identity_pool" "identity_pool" {
   }
 
   depends_on = [aws_cognito_user_pool_client.user_pool_client]
+  tags       = local.tags
 }
 
 resource "aws_s3_bucket" "jupyterhub_bucket" {
   count         = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0
   bucket_prefix = "jupyterhub-test-bucket-"
+  tags          = local.tags
 }
 
 resource "aws_s3_object" "engineering_object" {
   count  = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0
   bucket = aws_s3_bucket.jupyterhub_bucket[0].id
   key    = "engineering/"
+  tags   = local.tags
 }
 
 resource "aws_s3_object" "legal_object" {
   count  = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0
   bucket = aws_s3_bucket.jupyterhub_bucket[0].id
   key    = "legal/"
+  tags   = local.tags
 }
 
 #---------------------------------------------------------------
@@ -172,6 +179,7 @@ resource "aws_iam_role" "cognito_authenticated_engineering_role" {
       }
     ]
   })
+  tags = local.tags
 }
 
 resource "aws_iam_role_policy" "s3_cognito_engineering_policy" {

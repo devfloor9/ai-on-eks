@@ -3,7 +3,26 @@ resource "kubectl_manifest" "ai_ml_observability_yaml" {
   yaml_body = file("${path.module}/argocd-addons/ai-ml-observability.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
+  ]
+}
+
+resource "kubectl_manifest" "kuberay_operator_crds" {
+  count     = var.enable_kuberay_operator ? 1 : 0
+  yaml_body = templatefile("${path.module}/argocd-addons/kuberay-operator-crds.yaml", { kuberay_version = var.kuberay_operator_version })
+
+  depends_on = [
+    helm_release.argocd
+  ]
+}
+
+resource "kubectl_manifest" "kuberay_operator" {
+  count     = var.enable_kuberay_operator ? 1 : 0
+  yaml_body = templatefile("${path.module}/argocd-addons/kuberay-operator.yaml", { kuberay_version = var.kuberay_operator_version })
+
+  depends_on = [
+    helm_release.argocd,
+    kubectl_manifest.kuberay_operator_crds
   ]
 }
 
@@ -12,7 +31,7 @@ resource "kubectl_manifest" "aibrix_dependency_yaml" {
   yaml_body = templatefile("${path.module}/argocd-addons/aibrix-dependency.yaml", { aibrix_version = var.aibrix_stack_version })
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -21,7 +40,41 @@ resource "kubectl_manifest" "aibrix_core_yaml" {
   yaml_body = templatefile("${path.module}/argocd-addons/aibrix-core.yaml", { aibrix_version = var.aibrix_stack_version })
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
+  ]
+}
+
+resource "kubectl_manifest" "envoy_ai_gateway_crds_yaml" {
+  count     = var.enable_envoy_ai_gateway_crds ? 1 : 0
+  yaml_body = file("${path.module}/argocd-addons/envoy-ai-gateway-crds.yaml")
+  depends_on = [
+    helm_release.argocd
+  ]
+}
+
+resource "kubectl_manifest" "envoy_ai_gateway_yaml" {
+  count     = var.enable_envoy_ai_gateway ? 1 : 0
+  yaml_body = file("${path.module}/argocd-addons/envoy-ai-gateway.yaml")
+  depends_on = [
+    helm_release.argocd,
+    kubectl_manifest.envoy_ai_gateway_crds_yaml
+  ]
+}
+
+resource "kubectl_manifest" "redis_yaml" {
+  count     = var.enable_redis ? 1 : 0
+  yaml_body = file("${path.module}/argocd-addons/redis.yaml")
+  depends_on = [
+    helm_release.argocd
+  ]
+}
+
+resource "kubectl_manifest" "envoy_gateway_yaml" {
+  count     = var.enable_envoy_gateway ? 1 : 0
+  yaml_body = file("${path.module}/argocd-addons/envoy-gateway.yaml")
+  depends_on = [
+    helm_release.argocd,
+    kubectl_manifest.redis_yaml
   ]
 }
 
@@ -30,7 +83,7 @@ resource "kubectl_manifest" "lws_yaml" {
   yaml_body = file("${path.module}/argocd-addons/leader-worker-set.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -39,7 +92,7 @@ resource "kubectl_manifest" "nvidia_nim_yaml" {
   yaml_body = file("${path.module}/argocd-addons/nvidia-nim-operator.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -49,7 +102,7 @@ resource "kubectl_manifest" "nvidia_dra_driver" {
   yaml_body = file("${path.module}/argocd-addons/nvidia-dra-driver.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -61,17 +114,17 @@ resource "kubectl_manifest" "nvidia_gpu_operator" {
   })
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
 # NVIDIA Device Plugin (standalone - GPU scheduling only)
 resource "kubectl_manifest" "nvidia_device_plugin" {
-  count     = !var.enable_nvidia_gpu_operator && var.enable_nvidia_device_plugin ? 1 : 0
+  count     = !var.enable_nvidia_gpu_operator && var.enable_nvidia_device_plugin && !var.enable_eks_auto_mode ? 1 : 0
   yaml_body = templatefile("${path.module}/argocd-addons/nvidia-device-plugin.yaml", {})
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -83,7 +136,7 @@ resource "kubectl_manifest" "nvidia_dcgm_exporter" {
   })
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -93,7 +146,17 @@ resource "kubectl_manifest" "cert_manager_yaml" {
   yaml_body = file("${path.module}/argocd-addons/cert-manager.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
+  ]
+}
+
+# MariaDB Operator
+resource "kubectl_manifest" "mariadb_operator_yaml" {
+  count     = var.enable_mariadb_operator ? 1 : 0
+  yaml_body = file("${path.module}/argocd-addons/mariadb-operator.yaml")
+
+  depends_on = [
+    helm_release.argocd
   ]
 }
 
@@ -103,7 +166,7 @@ resource "kubectl_manifest" "slurm_operator_yaml" {
   yaml_body = file("${path.module}/argocd-addons/slurm-operator.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons,
+    helm_release.argocd,
     kubectl_manifest.cert_manager_yaml
   ]
 }
@@ -114,7 +177,7 @@ resource "kubectl_manifest" "mpi_operator" {
   yaml_body = file("${path.module}/argocd-addons/mpi-operator.yaml")
 
   depends_on = [
-    module.eks_blueprints_addons,
+    helm_release.argocd,
     kubectl_manifest.cert_manager_yaml
   ]
 }
@@ -125,7 +188,7 @@ resource "kubectl_manifest" "nvidia_dynamo_crds_yaml" {
   yaml_body = templatefile("${path.module}/argocd-addons/nvidia-dynamo-crds.yaml", { dynamo_version = var.dynamo_stack_version })
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }
 
@@ -135,6 +198,6 @@ resource "kubectl_manifest" "nvidia_dynamo_platform_yaml" {
   yaml_body = templatefile("${path.module}/argocd-addons/nvidia-dynamo-platform.yaml", { dynamo_version = var.dynamo_stack_version })
 
   depends_on = [
-    module.eks_blueprints_addons
+    helm_release.argocd
   ]
 }

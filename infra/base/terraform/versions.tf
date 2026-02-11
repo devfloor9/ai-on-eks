@@ -8,7 +8,7 @@ terraform {
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.95"
+      version = "~> 6.22"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -16,7 +16,7 @@ terraform {
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.17"
+      version = "~> 3.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -31,11 +31,4 @@ terraform {
       version = ">= 3.6.0" # Replace with the appropriate version of the random provider
     }
   }
-
-  # ##  Used for end-to-end testing on project; update to suit your needs
-  # backend "s3" {
-  #   bucket = "doeks-github-actions-e2e-test-state"
-  #   region = "us-west-2"
-  #   key    = "e2e/jark/terraform.tfstate"
-  # }
 }

@@ -1,0 +1,101 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: gpt-oss-backend
+  namespace: default
+spec:
+  endpoints:
+    - fqdn:
+        hostname: gpt-oss.default.svc.cluster.local
+        port: 8000
+---
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: gpt-oss
+  namespace: default
+spec:
+  backendRef:
+    name: gpt-oss-backend
+    kind: Backend
+    group: gateway.envoyproxy.io
+  schema:
+    name: OpenAI
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: qwen3-backend
+  namespace: default
+spec:
+  endpoints:
+    - fqdn:
+        hostname: qwen3.default.svc.cluster.local
+        port: 8000
+---
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: qwen3
+  namespace: default
+spec:
+  backendRef:
+    name: qwen3-backend
+    kind: Backend
+    group: gateway.envoyproxy.io
+  schema:
+    name: OpenAI
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: bedrock-backend
+  namespace: default
+spec:
+  endpoints:
+    - fqdn:
+        hostname: bedrock-runtime.us-west-2.amazonaws.com
+        port: 443
+---
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: bedrock
+  namespace: default
+spec:
+  backendRef:
+    name: bedrock-backend
+    kind: Backend
+    group: gateway.envoyproxy.io
+  schema:
+    name: AWSAnthropic
+    version: bedrock-2023-05-31
+---
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: bedrock-policy
+  namespace: default
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: bedrock
+  type: AWSCredentials
+  awsCredentials:
+    region: us-west-2
+---
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: bedrock-tls
+  namespace: default
+spec:
+  targetRefs:
+    - group: 'gateway.envoyproxy.io'
+      kind: Backend
+      name: bedrock-backend
+  validation:
+    wellKnownCACertificates: "System"
+    hostname: bedrock-runtime.us-west-2.amazonaws.com

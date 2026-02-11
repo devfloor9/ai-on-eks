@@ -1,0 +1,130 @@
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata:
+  name: multi-model-rate-limit-route
+  namespace: default
+spec:
+  parentRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rules:
+    - matches:
+        - headers:
+            - name: x-ai-eg-model
+              type: Exact
+              value: openai/gpt-oss-20b
+      backendRefs:
+        - name: gpt-oss
+    - matches:
+        - headers:
+            - name: x-ai-eg-model
+              type: Exact
+              value: anthropic.claude-3-haiku-20240307-v1:0
+      backendRefs:
+        - name: bedrock
+  # Configure token cost tracking for rate limiting
+  llmRequestCosts:
+    - metadataKey: llm_input_token
+      type: InputToken
+    - metadataKey: llm_output_token
+      type: OutputToken
+    - metadataKey: llm_total_token
+      type: TotalToken
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: multi-model-rate-limit-policy
+  namespace: default
+spec:
+  targetRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rateLimit:
+    type: Global
+    global:
+      rules:
+        # Input token rate limit per user per hour
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 50000  # 50K input tokens per hour per user
+            unit: Hour
+          cost:
+            request:
+              from: Number
+              number: 0  # Don't consume budget on request
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_input_token
+
+        # Output token rate limit per user per hour
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 25000  # 25K output tokens per hour per user
+            unit: Hour
+          cost:
+            request:
+              from: Number
+              number: 0
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_output_token
+
+        # Total token rate limit per user per hour
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 75000  # 75K total tokens per hour per user
+            unit: Hour
+          cost:
+            request:
+              from: Number
+              number: 0
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_total_token
+
+        # Request-based rate limit (requests per minute)
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 60  # 60 requests per minute per user
+            unit: Minute
+          cost:
+            request:
+              from: Number
+              number: 1  # Each request costs 1
+
+        # Model-specific rate limits for expensive models
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+                - name: x-ai-eg-model
+                  type: Exact
+                  value: openai/gpt-oss-20b
+          limit:
+            requests: 30  # Lower limit for expensive model
+            unit: Minute
+          cost:
+            request:
+              from: Number
+              number: 1

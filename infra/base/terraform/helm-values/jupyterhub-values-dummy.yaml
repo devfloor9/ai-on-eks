@@ -23,6 +23,8 @@ proxy:
 #      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
 #      service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
 singleuser:
+  cloudMetadata:
+    blockWithIptables: false # does not work on bottlerocket
   startTimeout: 1200 # 20 mins to spin up a notebook server for GPU including the image pull
   profileList:
     - display_name: Elyra (CPU)

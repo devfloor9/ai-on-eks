@@ -1,0 +1,42 @@
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata:
+  name: ai-gateway-route
+  namespace: default
+spec:
+  parentRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rules:
+    - matches:
+        - headers:
+            - name: x-ai-eg-model
+              type: Exact
+              value: openai/gpt-oss-20b
+      backendRefs:
+        - name: gpt-oss
+    - matches:
+        - headers:
+            - name: x-ai-eg-model
+              type: Exact
+              value: Qwen/Qwen3-1.7B
+      backendRefs:
+        - name: qwen3
+    - matches:
+        - headers:
+            - name: x-ai-eg-model
+              type: Exact
+              value: anthropic.claude-3-haiku-20240307-v1:0
+      backendRefs:
+        - name: bedrock-aws
+  # Token cost tracking
+  llmRequestCosts:
+    - metadataKey: llm_input_token
+      type: InputToken
+    - metadataKey: llm_output_token
+      type: OutputToken
+    - metadataKey: llm_total_token
+      type: TotalToken
+    - metadataKey: llm_cached_input_token
+      type: CachedInputToken

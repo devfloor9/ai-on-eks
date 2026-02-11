@@ -3,9 +3,14 @@ output "configure_kubectl" {
   value       = "aws eks --region ${var.region} update-kubeconfig --name ${var.name}"
 }
 
-output "grafana_secret_name" {
-  description = "The name of the secret containing the Grafana admin password."
-  value       = var.enable_kube_prometheus_stack ? aws_secretsmanager_secret.grafana[0].name : null
+# output "grafana_secret_name" {
+#   description = "The name of the secret containing the Grafana admin password."
+#   value       = var.enable_kube_prometheus_stack ? aws_secretsmanager_secret.grafana[0].name : null
+# }
+
+output "deployment_name" {
+  description = "Deployment name"
+  value       = var.name
 }
 
 output "fsx_s3_bucket_name" {

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-ai-gateway-controller
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/envoyproxy/ai-gateway
+    path: manifests/charts/ai-gateway-helm
+    targetRevision: v0.4.0
+    helm:
+      values: |
+        controller:
+          args:
+            - --extProcImage=docker.io/envoyproxy/ai-gateway-extproc:c87e367d026808e73dac690a4a353753c1d7d89c
+            - --extProcImagePullPolicy=IfNotPresent
+            - --extProcLogLevel=debug
+            - --tlsCertDir=/certs
+            - --tlsCertName=tls.crt
+            - --tlsKeyName=tls.key
+            - --enableLeaderElection=true
+            - --rootPrefix=/
+            - --cacheSyncTimeout=2m
+            - --watchNamespaces=
+            - --port=:1063
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: envoy-ai-gateway-system
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true

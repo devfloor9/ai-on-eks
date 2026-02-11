@@ -47,8 +47,10 @@ function HomepageHeader() {
                         to="/docs/blueprints/">
                         <span>Get Started</span>
                         <svg className={styles.buttonIcon} width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M10.75 8.75L14.25 12.25L10.75 15.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M19.25 12.25H5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M10.75 8.75L14.25 12.25L10.75 15.75" stroke="currentColor" strokeWidth="1.5"
+                                strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M19.25 12.25H5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+                                strokeLinejoin="round" />
                         </svg>
                     </Link>
                     <Link
@@ -57,7 +59,37 @@ function HomepageHeader() {
                         Explore Data on EKS
                     </Link>
                 </div>
-
+                <script async src="https://js.storylane.io/js/v2/storylane.js"></script>
+                <div className="sl-embed"
+                    style={{
+                        "position": "relative",
+                        "paddingBottom": "calc(40.25% + 25px)",
+                        "width": "100%",
+                        "maxWidth": "1280px",
+                        "transform": "scale(1)",
+                        "margin": "0 auto"
+                    }}
+                >
+                    <iframe loading="lazy" className="sl-demo"
+                        src="https://app.storylane.io/demo/uybpeyefbrgn?embed=inline" name="sl-embed"
+                        allow="fullscreen"
+                        allowFullScreen
+                        style={{
+                            "position": "absolute",
+                            "top": "0",
+                            "left": "0",
+                            "width": "100%!important",
+                            "height": "100%!important",
+                            "border": "1px solid rgba(63,95,172,0.35)",
+                            "boxShadow": "0px 0px 18px rgba(26, 19, 72, 0.15)",
+                            "borderRadius": "10px",
+                            "boxSizing": "border-box",
+                            "height": "100%",
+                            "width": "100%"
+                        }}
+                    >
+                    </iframe>
+                </div>
             </div>
 
             {/* Background Elements */}
@@ -78,7 +110,7 @@ function AIOnEKSHeader() {
 }
 
 export default function Home() {
-    const {siteConfig} = useDocusaurusContext();
+    const { siteConfig } = useDocusaurusContext();
     return (
         <Layout
             title={`AI on EKS (AIoEKS)`}
@@ -87,7 +119,7 @@ export default function Home() {
             <AIOnEKSHeader />
             <main>
                 <div className="container">
-                    <HomepageFeatures/>
+                    <HomepageFeatures />
                 </div>
             </main>
         </Layout>

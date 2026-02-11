@@ -1,6 +1,6 @@
 module "emr_containers" {
   source  = "terraform-aws-modules/emr/aws//modules/virtual-cluster"
-  version = "~> 1.0"
+  version = "~> 2.4"
 
   for_each = var.enable_amazon_emr ? toset(["ml-team-a", "ml-team-b"]) : toset([])
 

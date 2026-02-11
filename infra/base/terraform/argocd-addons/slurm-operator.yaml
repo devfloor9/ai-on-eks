@@ -3,12 +3,14 @@ kind: Application
 metadata:
   name: slurm-operator
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     chart: slurm-operator
     repoURL: ghcr.io/slinkyproject/charts
-    targetRevision: "0.4.1"
+    targetRevision: "1.0.1"
     helm:
       parameters:
         - name: crds.enabled

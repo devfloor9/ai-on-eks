@@ -28,7 +28,7 @@ spec:
 
         # GPU node targeting
         nodeSelector:
-         accelerator: nvidia
+         karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
 
         tolerations:
           - key: "nvidia.com/gpu"

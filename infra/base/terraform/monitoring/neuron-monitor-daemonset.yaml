@@ -43,4 +43,4 @@ spec:
           operator: Exists
           effect: NoSchedule
       nodeSelector:
-        accelerator: neuron
+        karpenter.k8s.aws/instance-accelerator-manufacturer: aws

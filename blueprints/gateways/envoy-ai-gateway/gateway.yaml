@@ -1,0 +1,70 @@
+# Pod Identity setup for AI Gateway with Bedrock
+# Note: IAM Role and Pod Identity Association are created via Terraform (envoy-ai-gateway.tf)
+# This part only creates the Kubernetes serviceaccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-gateway-dataplane-aws
+  namespace: default
+---
+# Baseline gateway infrastructure setup
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy-gateway
+  labels:
+    app.kubernetes.io/name: envoy-gateway
+    app.kubernetes.io/component: gateway-class
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: ai-gateway
+    namespace: default
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: ai-gateway
+  namespace: default
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyServiceAccount:
+        name: ai-gateway-dataplane-aws
+      envoyService:
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: external
+          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+          service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: traffic-port
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: ai-gateway
+  namespace: default
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: ai-gateway-buffer-limit
+  namespace: default
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: ai-gateway
+  connection:
+    bufferLimit: 50Mi

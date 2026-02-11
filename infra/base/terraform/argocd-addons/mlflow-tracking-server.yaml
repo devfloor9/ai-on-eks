@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mlflow-tracking-server
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aws-ia/terraform-aws-eks-data-addons.git
+    path: helm-charts/mlflow-tracking
+    targetRevision: "v1.38.0"
+    helm:
+      values: |
+        ${user_values_yaml}
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ${mlflow_namespace}
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

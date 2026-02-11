@@ -7,7 +7,7 @@ commonAffinity: &commonAffinity
           - key: "node.kubernetes.io/instance-type"
             operator: In
             values:
-              - "m5.xlarge"
+              - "m6i.xlarge"
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
     - weight: 100
@@ -19,13 +19,16 @@ commonAffinity: &commonAffinity
             values: ["slurmdbd", "slurmctld", "slurm-exporter", "login", "mariadb", "slurmrestd"]
         topologyKey: "kubernetes.io/hostname"
 
-
 # Slurm controller (slurmctld) configurations.
 controller:
   persistence:
     storageClassName: gp3
   podSpec:
     affinity: *commonAffinity
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 # Slurm accounting (slurmdbd) configurations.
 accounting:
@@ -36,11 +39,6 @@ accounting:
 # Slurm REST API (slurmrestd) configurations.
 restapi:
   podSpec:
-    affinity: *commonAffinity
-
-# `slurm-exporter` subchart configurations.
-slurm-exporter:
-  exporter:
     affinity: *commonAffinity
 
 # Login node configurations.
@@ -95,8 +93,9 @@ nodesets:
           mountPath: /dev/shm
     podSpec:
       nodeSelector:
-        instanceType: g5-gpu-karpenter
+        karpenter.sh/nodepool: g5-nvidia
         kubernetes.io/os: linux
+        node.kubernetes.io/instance-type: g5.8xlarge
       tolerations:
         - key: "nvidia.com/gpu"
           operator: "Exists"
@@ -108,3 +107,16 @@ nodesets:
         - name: shmem
           hostPath:
             path: /dev/shm
+    extraConfMap:
+      Gres: ["gpu:a10g:1"]
+
+# Enable DCGM GPU-to-job mapping integration
+vendor:
+  nvidia:
+    dcgm:
+      enabled: true
+
+# Generic Resource (GRES) Scheduling for GPUs
+configFiles:
+  gres.conf: |
+    AutoDetect=nvidia

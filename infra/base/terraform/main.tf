@@ -2,13 +2,6 @@ provider "aws" {
   region = local.region
 }
 
-# ECR always authenticates with `us-east-1` region
-# Docs -> https://docs.aws.amazon.com/AmazonECR/latest/public/public-registries.html
-provider "aws" {
-  alias  = "ecr"
-  region = "us-east-1"
-}
-
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -16,12 +9,19 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
     token                  = data.aws_eks_cluster_auth.this.token
   }
+
+  registries = [{
+    url      = "oci://public.ecr.aws"
+    username = data.aws_ecrpublic_authorization_token.token.user_name
+    password = data.aws_ecrpublic_authorization_token.token.password
+  }]
 }
+
 provider "kubectl" {
   apply_retry_count      = 30
   host                   = module.eks.cluster_endpoint
@@ -37,7 +37,7 @@ data "aws_eks_cluster_auth" "this" {
 data "aws_availability_zones" "available" {}
 
 data "aws_ecrpublic_authorization_token" "token" {
-  provider = aws.ecr
+  region = "us-east-1"
 }
 
 data "aws_caller_identity" "current" {}

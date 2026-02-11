@@ -234,7 +234,7 @@ spec:
               effect: "NoSchedule"
           # Target only nodes with accelerator: nvidia label (consistent with device plugin)
           nodeSelector:
-            accelerator: nvidia
+            karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
 
         # Resources
         operator:

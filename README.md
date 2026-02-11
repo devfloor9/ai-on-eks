@@ -28,6 +28,14 @@ In this repository, you'll find a variety of deployment blueprints for creating 
 
 🚀 [Generative AI on EKS](https://github.com/awslabs/ai-on-eks/tree/main/blueprints/) 👈 Collection of Generative AI Training and Inference LLM deployment patterns
 
+🚀 [Envoy AI Gateway](blueprints/gateways/envoy-ai-gateway/) 👈 Intelligent routing and management for AI/ML workloads with multi-model routing and rate limiting
+
+## 🎯 Use Cases
+
+🚀 [Multi-Model Routing](blueprints/gateways/envoy-ai-gateway/multi-model-routing/) 👈 Route requests to different AI models based on headers
+
+🚀 [Rate Limiting](blueprints/gateways/envoy-ai-gateway/rate-limiting/) 👈 Usage-based rate limiting with automatic tracking
+
 ## 📚 Documentation
 For instructions on how to deploy AI on EKS patterns and run sample tests, visit the [AIoEKS website](https://awslabs.github.io/ai-on-eks/).
 

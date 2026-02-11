@@ -4,7 +4,7 @@
 module "elasticache" {
   create  = var.enable_rayserve_ha_elastic_cache_redis
   source  = "terraform-aws-modules/elasticache/aws"
-  version = "1.2.0"
+  version = "1.10"
 
   cluster_id               = local.name
   create_cluster           = true

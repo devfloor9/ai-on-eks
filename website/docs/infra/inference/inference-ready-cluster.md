@@ -102,7 +102,7 @@ This infrastructure deploys the following AWS resources:
 
 ### Architecture Diagram
 
-![architecture](pathname://../../../infra/solutions/inference-ready-cluster/image/architecture.png)
+![architecture](../../../infra/solutions/inference-ready-cluster/image/architecture.png)
 
 ### Prerequisites
 

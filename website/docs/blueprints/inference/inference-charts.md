@@ -10,7 +10,7 @@ pre-configured values for popular models.
 
 :::info Advanced Usage
 For detailed configuration options, advanced deployment scenarios, and comprehensive parameter documentation, see
-the [complete README](https://github.com/awslabs/ai-on-eks/blob/main/blueprints/inference/inference-charts/README.md).
+the [complete README](https://github.com/awslabs/ai-on-eks-charts/blob/main/charts/inference-charts/README.md).
 :::
 
 ## Overview
@@ -65,13 +65,17 @@ instances.
 :::
 
 ```bash
-# Deploy Llama 3.2 1B on GPU with vLLM
-helm install llama-inference ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-llama-32-1b-vllm.yaml
+# Add the charts repository
+helm repo add ai-on-eks https://awslabs.github.io/ai-on-eks-charts/
+helm repo update
+
+# Deploy Qwen 3 1.7B on GPU with vLLM
+helm install qwen3-inference ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-qwen3-1.7b-vllm.yaml
 
 # Deploy DeepSeek R1 Distill on GPU with Ray-vLLM
-helm install deepseek-inference ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-deepseek-r1-distill-llama-8b-ray-vllm-gpu.yaml
+helm install deepseek-inference ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-deepseek-r1-distill-llama-8b-ray-vllm-gpu.yaml
 ```
 
 ## Supported Models
@@ -108,41 +112,45 @@ Each model comes with optimized configurations for different frameworks (VLLM, R
 ### Language Model Deployments
 
 ```bash
-# Deploy Llama 3.2 1B with VLLM
-helm install llama32-vllm ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-llama-32-1b-vllm.yaml
+# Add the charts repository
+helm repo add ai-on-eks https://awslabs.github.io/ai-on-eks-charts/
+helm repo update
 
-# Deploy DeepSeek R1 Distill with Ray-VLLM
-helm install deepseek-ray ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-deepseek-r1-distill-llama-8b-ray-vllm-gpu.yaml
+# Deploy Qwen 3 1.7B on GPU with vLLM
+helm install qwen3-inference ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-qwen3-1.7b-vllm.yaml
+
+# Deploy DeepSeek R1 Distill on GPU with Ray-vLLM
+helm install deepseek-inference ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-deepseek-r1-distill-llama-8b-ray-vllm-gpu.yaml
 
 # Deploy Llama 4 Scout 17B with LeaderWorkerSet-VLLM
-helm install llama4-lws ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-llama-4-scout-17b-lws-vllm.yaml
+helm install llama4-lws ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-llama-4-scout-17b-lws-vllm.yaml
 ```
 
 ### Diffusion Model Deployments
 
 ```bash
 # Deploy FLUX.1 Schnell for image generation
-helm install flux-diffusers ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-flux-1-diffusers.yaml
+helm install flux-diffusers ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-flux-1-diffusers.yaml
 
 # Deploy Stable Diffusion XL
-helm install sdxl-diffusers ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-stable-diffusion-xl-base-1-diffusers.yaml
+helm install sdxl-diffusers ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-stable-diffusion-xl-base-1-diffusers.yaml
 ```
 
 ### Neuron Deployments
 
 ```bash
 # Deploy Llama 3.1 8B on Inferentia
-helm install llama31-neuron ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-llama-31-8b-vllm-neuron.yaml
+helm install llama31-neuron ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-llama-31-8b-vllm-neuron.yaml
 
 # Deploy Llama 3 70B with Ray-VLLM on Inferentia
-helm install llama3-70b-neuron ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-llama-3-70b-ray-vllm-neuron.yaml
+helm install llama3-70b-neuron ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-llama-3-70b-ray-vllm-neuron.yaml
 ```
 
 ### S3 Model Copy
@@ -156,8 +164,8 @@ useful for:
 
 ```bash
 # Copy Llama 3 8B model from Hugging Face to S3
-helm install s3-copy-llama3 ./blueprints/inference/inference-charts \
-  --values ./blueprints/inference/inference-charts/values-s3-copy-llama3-8b.yaml
+helm install s3-copy-llama3 ai-on-eks/inference-charts \
+  --values https://raw.githubusercontent.com/awslabs/ai-on-eks-charts/refs/heads/main/charts/inference-charts/values-s3-copy-llama3-8b.yaml
 ```
 
 #### Custom S3 Model Copy
@@ -176,7 +184,7 @@ serviceAccountName: s3-copy-service-account  # Service account with S3 write per
 Deploy the S3 copy job:
 
 ```bash
-helm install custom-s3-copy ./blueprints/inference/inference-charts \
+helm install custom-s3-copy ai-on-eks/inference-charts \
   --values custom-s3-copy-values.yaml
 ```
 
@@ -230,7 +238,7 @@ modelParameters:
 Deploy with custom values:
 
 ```bash
-helm install my-inference ./blueprints/inference/inference-charts \
+helm install my-inference ai-on-eks/inference-charts \
   --values custom-values.yaml
 ```
 

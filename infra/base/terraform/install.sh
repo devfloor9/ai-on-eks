@@ -4,6 +4,8 @@
 targets=(
   "module.vpc"
   "module.eks"
+  "module.karpenter"
+  "module.argocd"
 )
 
 # Initialize Terraform

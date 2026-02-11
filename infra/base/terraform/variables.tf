@@ -12,7 +12,7 @@ variable "region" {
 
 variable "eks_cluster_version" {
   description = "EKS Cluster version"
-  default     = "1.33"
+  default     = "1.34"
   type        = string
 }
 
@@ -71,6 +71,12 @@ variable "enable_database_subnets" {
   default     = false
 }
 
+variable "enable_eks_auto_mode" {
+  description = "Whether or not to use auto mode for the cluster"
+  type        = bool
+  default     = false
+}
+
 # EKS Addons
 variable "enable_cluster_addons" {
   description = <<DESC
@@ -87,7 +93,6 @@ DESC
     kube-proxy                      = true
     vpc-cni                         = true
     eks-pod-identity-agent          = true
-    aws-ebs-csi-driver              = true
     metrics-server                  = true
     eks-node-monitoring-agent       = true
     amazon-cloudwatch-observability = true
@@ -141,11 +146,6 @@ variable "enable_kube_prometheus_stack" {
   type        = bool
   default     = false
 }
-variable "enable_kubecost" {
-  description = "Enable Kubecost addon"
-  type        = bool
-  default     = false
-}
 variable "enable_ai_ml_observability_stack" {
   description = "Enable AI/ML observability addon"
   type        = bool
@@ -161,11 +161,31 @@ variable "enable_argo_events" {
   type        = bool
   default     = false
 }
-variable "enable_argocd" {
-  description = "Enable ArgoCD addon"
+
+variable "enable_envoy_ai_gateway" {
+  description = "Enable Envoy AI Gateway addon"
   type        = bool
-  default     = true
+  default     = false
 }
+
+variable "enable_envoy_ai_gateway_crds" {
+  description = "Enable Envoy AI Gateway CRDs for AI gateway resources"
+  type        = bool
+  default     = false
+}
+
+variable "enable_envoy_gateway" {
+  description = "Enable Envoy Gateway addon"
+  type        = bool
+  default     = false
+}
+
+variable "enable_redis" {
+  description = "Enable cluster local Redis addon"
+  type        = bool
+  default     = false
+}
+
 variable "enable_mlflow_tracking" {
   description = "Enable MLFlow Tracking"
   type        = bool
@@ -176,15 +196,15 @@ variable "enable_jupyterhub" {
   type        = bool
   default     = false
 }
-variable "enable_volcano" {
-  description = "Enable Volcano"
-  type        = bool
-  default     = false
-}
 variable "enable_kuberay_operator" {
   description = "Enable KubeRay Operator"
   type        = bool
   default     = false
+}
+variable "kuberay_operator_version" {
+  description = "KubeRay operator default version"
+  type        = string
+  default     = "1.5.1"
 }
 variable "huggingface_token" {
   description = "Hugging Face Secret Token"
@@ -221,13 +241,6 @@ variable "enable_service_mutator_webhook" {
   description = "Enable service-mutator webhook for AWS Load Balancer Controller"
   type        = bool
   default     = false
-}
-
-# Ingress-Nginx Controller
-variable "enable_ingress_nginx" {
-  description = "Enable ingress-nginx addon"
-  type        = bool
-  default     = true
 }
 
 # ArgoCD Addons for ai-on-eks/infra/base/terraform/argocd_addons.tf
@@ -320,6 +333,13 @@ variable "enable_nvidia_dcgm_exporter" {
 # Cert Manager
 variable "enable_cert_manager" {
   description = "Enable cert-manager addon"
+  type        = bool
+  default     = false
+}
+
+# MariaDB Operator
+variable "enable_mariadb_operator" {
+  description = "Enable mariadb-operator addon"
   type        = bool
   default     = false
 }
@@ -446,6 +466,18 @@ variable "ami_family" {
     condition     = var.ami_family == "bottlerocket" || var.ami_family == "al2023"
     error_message = "The ami_family must be set to either \"bottlerocket\" or \"al2023\"."
   }
+}
+
+variable "karpenter_version" {
+  description = "Karpenter version"
+  type        = string
+  default     = "1.8.1"
+}
+
+variable "karpenter_additional_ec2nodeclassnames" {
+  description = "Additional EC2 NodeClass Names"
+  type        = list(string)
+  default     = []
 }
 
 # S3 Model Storage Variables

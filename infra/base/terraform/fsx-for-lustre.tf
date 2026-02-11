@@ -76,7 +76,7 @@ resource "aws_security_group" "fsx" {
 module "fsx_s3_bucket" {
   count   = var.deploy_fsx_volume ? 1 : 0
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 3.0"
+  version = "~> 5.7"
 
   create_bucket = true
 
@@ -91,37 +91,58 @@ module "fsx_s3_bucket" {
       }
     }
   }
+  tags = local.tags
 }
 
 #---------------------------------------------------------------
 # Storage Class - FSx for Lustre
 #---------------------------------------------------------------
-resource "kubectl_manifest" "storage_class" {
+resource "kubernetes_storage_class_v1" "fsx" {
   count = var.deploy_fsx_volume ? 1 : 0
-  yaml_body = templatefile("${path.module}/fsx-for-lustre/fsxlustre-storage-class.yaml", {
-    subnet_id         = module.vpc.private_subnets[0],
-    security_group_id = aws_security_group.fsx[0].id
-  })
+  metadata {
+    name = "fsx"
+  }
+
+  storage_provisioner = "fsx.csi.aws.com"
+  parameters = {
+    subnetId         = module.vpc.private_subnets[0]
+    securityGroupIds = aws_security_group.fsx[0].id
+  }
 
   depends_on = [
-    module.eks_blueprints_addons
+    aws_eks_addon.aws_efs_csi_driver,
+    module.efs
   ]
 }
 
 #---------------------------------------------------------------
 # FSx for Lustre Persistent Volume - Static provisioning
 #---------------------------------------------------------------
-resource "kubectl_manifest" "static_pv" {
-  count = var.deploy_fsx_volume ? 1 : 0
-  yaml_body = templatefile("${path.module}/fsx-for-lustre/fsxlustre-static-pv.yaml", {
-    filesystem_id = aws_fsx_lustre_file_system.this[0].id,
-    dns_name      = aws_fsx_lustre_file_system.this[0].dns_name
-    mount_name    = aws_fsx_lustre_file_system.this[0].mount_name,
-  })
 
+resource "kubernetes_persistent_volume_v1" "fsx_static_pv" {
+  count = var.deploy_fsx_volume ? 1 : 0
+  metadata {
+    name = "fsx-static-pv"
+  }
+  spec {
+    access_modes       = ["ReadWriteMany"]
+    capacity           = { storage : "1000Gi" }
+    volume_mode        = "Filesystem"
+    storage_class_name = "fsx"
+    persistent_volume_source {
+      csi {
+        driver        = "fsx.csi.aws.com"
+        volume_handle = aws_fsx_lustre_file_system.this[0].id
+        volume_attributes = {
+          dnsname = aws_fsx_lustre_file_system.this[0].dns_name
+          mountname : aws_fsx_lustre_file_system.this[0].mount_name
+        }
+      }
+    }
+  }
   depends_on = [
-    module.eks_blueprints_addons,
-    kubectl_manifest.storage_class,
+    aws_eks_addon.aws_fsx_csi_driver,
+    kubernetes_storage_class_v1.fsx,
     aws_fsx_lustre_file_system.this
   ]
 }
@@ -135,21 +156,27 @@ resource "kubernetes_namespace" "fsx_namespace" {
     name = var.fsx_pvc_namespace
   }
   depends_on = [
-    module.eks_blueprints_addons
+    aws_eks_addon.aws_fsx_csi_driver
   ]
 }
 
-resource "kubectl_manifest" "static_pvc" {
+resource "kubernetes_persistent_volume_claim_v1" "fsx" {
   count = var.deploy_fsx_volume ? 1 : 0
-  yaml_body = templatefile("${path.module}/fsx-for-lustre/fsxlustre-static-pvc.yaml", {
+  metadata {
+    name      = "fsx-static-pvc"
     namespace = var.fsx_pvc_namespace
-  })
-
+  }
+  spec {
+    access_modes       = ["ReadWriteMany"]
+    storage_class_name = "fsx"
+    volume_name        = "fsx-static-pv"
+    resources {
+      requests = {
+        storage = "1000Gi"
+      }
+    }
+  }
   depends_on = [
-    module.eks_blueprints_addons,
-    kubectl_manifest.storage_class,
-    kubectl_manifest.static_pv,
-    aws_fsx_lustre_file_system.this,
-    kubernetes_namespace.fsx_namespace
+    kubernetes_persistent_volume_v1.fsx_static_pv
   ]
 }

@@ -1,0 +1,67 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: rate-limit-policy
+  namespace: default
+spec:
+  targetRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rateLimit:
+    type: Global
+    global:
+      rules:
+        # Input token rate limit - low for testing
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 10  # 10 input tokens per hour
+            unit: Hour
+          cost:
+            request:
+              from: Number
+              number: 0
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_input_token
+
+        # Output token rate limit
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 20  # 20 output tokens per hour
+            unit: Hour
+          cost:
+            request:
+              from: Number
+              number: 0
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_output_token
+
+        # Total token rate limit
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            requests: 25  # 25 total tokens per hour
+            unit: Hour
+          cost:
+            request:
+              from: Number
+              number: 0
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_total_token

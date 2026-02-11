@@ -1,5 +1,0 @@
-## ArgoCD build options
-configs:
-  cm:
-    kustomize.buildOptions: --enable-helm
-    application.resourceTrackingMethod: annotation
