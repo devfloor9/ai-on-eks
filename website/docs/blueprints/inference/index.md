@@ -12,7 +12,7 @@ This section provides practical deployment guides and Helm charts for running in
 
 ---
 
-## [Inference Charts](./inference-charts)
+## [Inference Charts](./inference-charts.md)
 
 Helm charts for deploying popular AI models on EKS with pre-configured values for optimal performance.
 
@@ -27,7 +27,7 @@ Helm charts for deploying popular AI models on EKS with pre-configured values fo
 - Standardized deployment patterns across your organization
 - Reference implementations for custom model deployments
 
-[Explore Inference Charts →](./inference-charts)
+[Explore Inference Charts →](./inference-charts.md)
 
 ---
 
@@ -68,7 +68,7 @@ Step-by-step guides for deploying models on AWS Inferentia and Trainium:
 1. **Set up your infrastructure** - Start with the [Inference-Ready Cluster](../../infra/inference/inference-ready-cluster) to provision an EKS cluster optimized for AI/ML workloads
 
 2. **Choose your deployment method**:
-   - For quick deployments with popular models → Use [Inference Charts](./inference-charts)
+   - For quick deployments with popular models → Use [Inference Charts](./inference-charts.md)
    - For specific frameworks or custom configurations → Follow [Framework-Specific Guides](./framework-guides/)
 
 3. **Optimize your deployment** - Apply best practices from the [Guidance section](../../guidance/) to improve performance and reduce costs
