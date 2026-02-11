@@ -2,11 +2,11 @@
 locals {
   kube_prometheus_values = templatefile("${path.module}/helm-values/kube-prometheus.yaml", {
     # Add template variables if needed for AMP integration
-    region              = local.region
-    amp_sa              = local.amp_ingest_service_account
-    amp_remotewrite_url = var.enable_amazon_prometheus ? "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}/api/v1/remote_write" : ""
-    amp_url             = var.enable_amazon_prometheus ? "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}" : ""
-    storage_class_name  = "gp3"
+    region               = local.region
+    amp_sa               = local.amp_ingest_service_account
+    amp_remotewrite_url  = var.enable_amazon_prometheus ? "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}/api/v1/remote_write" : ""
+    amp_url              = var.enable_amazon_prometheus ? "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}" : ""
+    storage_class_name   = "gp3"
     grafana_service_port = var.grafana_service_port
   })
 }
@@ -98,13 +98,13 @@ resource "kubectl_manifest" "kube_prometheus_stack" {
 # Deployed after kube-prometheus-stack to manage custom dashboards
 #---------------------------------------------------------------
 resource "helm_release" "grafana_operator" {
-  count      = var.enable_grafana_operator ? 1 : 0
-  name       = "grafana-operator"
-  namespace  = var.kube_prometheus_stack_namespace
-  repository = "https://grafana.github.io/helm-charts"
-  chart      = "grafana-operator"
-  version    = var.grafana_operator_version
-  wait       = false
+  count           = var.enable_grafana_operator ? 1 : 0
+  name            = "grafana-operator"
+  namespace       = var.kube_prometheus_stack_namespace
+  repository      = "https://grafana.github.io/helm-charts"
+  chart           = "grafana-operator"
+  version         = var.grafana_operator_version
+  wait            = false
   cleanup_on_fail = true
 
   values = [
