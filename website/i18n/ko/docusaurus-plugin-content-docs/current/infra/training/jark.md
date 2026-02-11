@@ -32,14 +32,14 @@ JARK는 [AI/ML 관측성](https://github.com/awslabs/ai-ml-observability-referen
 JARK 스택은 AI 모델 배포 및 관리의 복잡한 프로세스를 단순화하려는 팀과 조직에 이상적입니다. 최첨단 생성형 모델을 작업하든 기존 AI 워크로드를 확장하든, Amazon EKS 기반 JARK는 성공에 필요한 유연성, 확장성 및 제어 기능을 제공합니다.
 
 
-![alt text](img/jark.png)
+![alt text](../img/jark.png)
 
 
 ### Kubernetes 기반 Ray
 
 [Ray](https://www.ray.io/)는 확장 가능하고 분산된 애플리케이션을 구축하기 위한 오픈소스 프레임워크입니다. 분산 컴퓨팅을 위한 간단하고 직관적인 API를 제공하여 병렬 및 분산 Python 애플리케이션을 쉽게 작성할 수 있도록 설계되었습니다. 사용자 및 기여자 커뮤니티가 성장하고 있으며, Anyscale, Inc.의 Ray 팀에서 적극적으로 유지 관리 및 개발하고 있습니다.
 
-![RayCluster](img/ray-cluster.svg)
+![RayCluster](../img/ray-cluster.svg)
 
 *출처: https://docs.ray.io/en/latest/cluster/key-concepts.html*
 
@@ -63,7 +63,7 @@ Kubernetes에서 Ray를 배포하면 다음과 같은 여러 이점을 얻을 �
 
 배포를 진행하기 전에 공식 [문서](https://docs.ray.io/en/latest/cluster/kubernetes/index.html)의 관련 섹션을 읽어보시기 바랍니다.
 
-![RayonK8s](img/ray_on_kubernetes.webp)
+![RayonK8s](../img/ray_on_kubernetes.webp)
 
 *출처: https://docs.ray.io/en/latest/cluster/kubernetes/index.html*
 
@@ -71,7 +71,7 @@ Kubernetes에서 Ray를 배포하면 다음과 같은 여러 이점을 얻을 �
 
 이 [예제](https://github.com/awslabs/ai-on-eks/tree/main/infra/jark-stack/terraform)에서는 Amazon EKS에 JARK 클러스터를 프로비저닝합니다.
 
-![JARK](img/jark-stack.png)
+![JARK](../img/jark-stack.png)
 
 
 ### 사전 요구 사항

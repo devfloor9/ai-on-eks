@@ -11,7 +11,7 @@ NVIDIA RAPIDS Accelerator for Apache Spark는 NVIDIA CUDA의 기능을 기반으
 Spark 3용 RAPIDS Accelerator의 발명으로 NVIDIA는 Spark SQL 및 DataFrame 작업의 효율성을 크게 향상시켜 추출, 변환 및 로드 파이프라인을 성공적으로 혁신했습니다. RAPIDS cuDF 라이브러리의 기능과 Spark 분산 컴퓨팅 에코시스템의 광범위한 도달 범위를 결합하여 RAPIDS Accelerator for Apache Spark는 대규모 계산을 처리하기 위한 강력한 솔루션을 제공합니다.
 또한 RAPIDS Accelerator 라이브러리는 UCX로 최적화된 고급 셔플을 통합하여 GPU 간 통신 및 RDMA 기능을 지원하도록 구성할 수 있어 성능을 더욱 향상시킵니다.
 
-![Alt text](img/nvidia.png)
+![Alt text](../img/nvidia.png)
 
 ### NVIDIA RAPIDS Accelerator for Apache Spark에 대한 EMR 지원
 Amazon EMR과 NVIDIA RAPIDS Accelerator for Apache Spark의 통합 Amazon EMR on EKS는 이제 NVIDIA RAPIDS Accelerator for Apache Spark와 함께 GPU 인스턴스 유형 사용에 대한 지원을 확장합니다. 인공 지능(AI) 및 머신 러닝(ML)의 사용이 데이터 분석 영역에서 계속 확장됨에 따라 GPU가 제공할 수 있는 빠르고 비용 효율적인 데이터 처리에 대한 수요가 증가하고 있습니다. NVIDIA RAPIDS Accelerator for Apache Spark를 통해 사용자는 GPU의 우수한 성능을 활용하여 상당한 인프라 비용 절감을 달성할 수 있습니다.
@@ -218,7 +218,7 @@ chmod +x execute_spark_rapids_xgboost.sh
 
 파드 상태 확인
 
-![Alt text](img/spark-rapids-pod-status.png)
+![Alt text](../img/spark-rapids-pod-status.png)
 
 
 :::info
@@ -277,7 +277,7 @@ spark-rapids-emr/949wt7zuphox1beiv0i30v65i/jobs/0000000327fe50tosa4/containers/s
 **7단계**: 마지막으로 훈련되고 검증된 XGBoost 모델을 사용하여 새롭고 보이지 않는 대출 데이터에 대한 예측을 수행할 수 있습니다. 이러한 예측은 대출 채무 불이행과 관련된 잠재적 위험을 식별하거나 대출 성과를 평가하는 데 도움이 될 수 있습니다.
 
 
-![Alt text](img/emr-spark-rapids-fannie-mae.png)
+![Alt text](../img/emr-spark-rapids-fannie-mae.png)
 
 ### DCGM Exporter, Prometheus 및 Grafana를 사용한 GPU 모니터링
 
@@ -313,7 +313,7 @@ aws secretsmanager get-secret-value --secret-id emr-spark-rapids-grafana --regio
 
 로그인한 후 AMP 데이터 소스를 Grafana에 추가하고 오픈소스 GPU 모니터링 대시보드를 가져옵니다. 그런 다음 아래 스크린샷과 같이 Grafana 대시보드를 사용하여 메트릭을 탐색하고 시각화할 수 있습니다.
 
-![Alt text](img/gpu-dashboard.png)
+![Alt text](../img/gpu-dashboard.png)
 
 <CollapsibleContent header={<h2><span>정리</span></h2>}>
 

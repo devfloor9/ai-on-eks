@@ -64,18 +64,18 @@ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certifi
 서비스는 개인 키와 자체 서명 인증서를 생성합니다.
 인증서를 생성하기 위한 샘플 프롬프트:
 
-![](img/Cert_Install.png)
+![](../img/Cert_Install.png)
 
 
 6. AWS Certificate Manager로 인증서 가져오기
 
 텍스트 편집기에서 개인 키(`key.pem`)를 열고 내용을 ACM의 개인 키 섹션에 복사합니다. 마찬가지로 `certificate.pem` 파일의 내용을 인증서 본문 섹션에 복사하고 제출합니다.
 
-   ![](img/ACM.png)
+   ![](../img/ACM.png)
 
    ACM에서 콘솔에서 인증서가 올바르게 설치되었는지 확인합니다.
 
-   ![](img/Cert_List.png)
+   ![](../img/Cert_List.png)
 
 </CollapsibleContent>
 
@@ -177,13 +177,13 @@ kubectl port-forward svc/proxy-public 8080:80 -n jupyterhub
 ```
 
 **로그인:** 웹 브라우저에서 [http://localhost:8080/](http://localhost:8080/)로 이동합니다. 사용자 이름으로 `user-1`을 입력하고 아무 비밀번호나 선택합니다.
-![alt text](img/image.png)
+![alt text](../img/image.png)
 
-서버 옵션 선택: 로그인하면 선택할 수 있는 다양한 노트북 인스턴스 프로필이 표시됩니다. `Data Engineering (CPU)` 서버는 전통적인 CPU 기반 노트북 작업용입니다. `Elyra` 서버는 파이프라인을 빠르게 개발할 수 있는 [Elyra](https://github.com/elyra-ai/elyra) 기능을 제공합니다: ![workflow](img/elyra-workflow.png). `Trainium` 및 `Inferentia` 서버는 노트북 서버를 Trainium 및 Inferentia 노드에 배포하여 가속화된 워크로드를 허용합니다. `Time Slicing` 및 `MIG`는 GPU 공유를 위한 두 가지 다른 전략입니다. 마지막으로 `Data Science (GPU)` 서버는 NVIDIA GPU에서 실행되는 전통적인 서버입니다.
+서버 옵션 선택: 로그인하면 선택할 수 있는 다양한 노트북 인스턴스 프로필이 표시됩니다. `Data Engineering (CPU)` 서버는 전통적인 CPU 기반 노트북 작업용입니다. `Elyra` 서버는 파이프라인을 빠르게 개발할 수 있는 [Elyra](https://github.com/elyra-ai/elyra) 기능을 제공합니다: ![workflow](../img/elyra-workflow.png). `Trainium` 및 `Inferentia` 서버는 노트북 서버를 Trainium 및 Inferentia 노드에 배포하여 가속화된 워크로드를 허용합니다. `Time Slicing` 및 `MIG`는 GPU 공유를 위한 두 가지 다른 전략입니다. 마지막으로 `Data Science (GPU)` 서버는 NVIDIA GPU에서 실행되는 전통적인 서버입니다.
 
 이 타임슬라이싱 기능 시연을 위해 **Data Science (GPU + Time-Slicing – G5)** 프로필을 사용합니다. 이 옵션을 선택하고 Start 버튼을 선택하세요.
 
-![alt text](img/notebook-server-list.png)
+![alt text](../img/notebook-server-list.png)
 
 `g5.2xlarge` 인스턴스 유형으로 Karpenter가 생성한 새 노드는 [NVIDIA device plugin](https://github.com/NVIDIA/k8s-device-plugin)에서 제공하는 타임슬라이싱 기능을 활용하도록 구성되었습니다. 이 기능을 사용하면 단일 GPU를 여러 할당 가능한 단위로 분할하여 효율적인 GPU 활용이 가능합니다. 이 경우 NVIDIA device plugin Helm 차트 구성 맵에서 `4`개의 할당 가능한 GPU를 정의했습니다. 아래는 노드 상태입니다:
 
@@ -218,7 +218,7 @@ GPU 타임슬라이싱이 작동하는 것을 시연하기 위해 다른 Jupyter
 
 서버 옵션 선택: 로그인 후 서버 옵션 페이지가 표시됩니다. **Data Science (GPU + Time-Slicing – G5)** 라디오 버튼을 선택하고 Start를 선택합니다.
 
-![alt text](img/image-2.png)
+![alt text](../img/image-2.png)
 
 파드 배치 확인: 이 파드 배치는 `user-1`과 달리 몇 초밖에 걸리지 않습니다. Kubernetes 스케줄러가 `user-1` 파드에서 생성한 기존 `g5.2xlarge` 노드에 파드를 배치할 수 있기 때문입니다. `user-2`도 동일한 도커 이미지를 사용하므로 도커 이미지를 가져오는 데 지연이 없고 로컬 캐시를 활용했습니다.
 
@@ -240,7 +240,7 @@ kubectl get pods -n jupyterhub -owide | grep -i user
 
 로드 밸런서 DNS 이름으로 JupyterHub 도메인에 대한 `CNAME` DNS 레코드를 ChangeIP에 추가합니다.
 
-![](img/CNAME.png)
+![](../img/CNAME.png)
 
 :::info
 ChangeIP의 CNAME 값 필드에 로드 밸런서 DNS 이름을 추가할 때 로드 밸런서 DNS 이름 끝에 점(`.`)을 추가해야 합니다.
@@ -248,21 +248,21 @@ ChangeIP의 CNAME 값 필드에 로드 밸런서 DNS 이름을 추가할 때 로
 
 이제 브라우저에서 도메인 URL을 입력하면 JupyterHub 로그인 페이지로 리디렉션됩니다.
 
-![](img/Cognito-Sign-in.png)
+![](../img/Cognito-Sign-in.png)
 
 
 Cognito 가입 및 로그인 프로세스를 따라 로그인합니다.
 
-![](img/Cognito-Sign-up.png)
+![](../img/Cognito-Sign-up.png)
 
 성공적인 로그인은 로그인한 사용자를 위한 JupyterHub 환경을 엽니다.
 
-![](img/jupyter_launcher.png)
+![](../img/jupyter_launcher.png)
 
 JupyterHub에서 공유 및 개인 디렉터리 설정을 테스트하려면 다음 단계를 따르세요:
 1. 런처 대시보드에서 터미널 창을 엽니다.
 
-![](img/jupyter_env.png)
+![](../img/jupyter_env.png)
 
 2.  명령을 실행합니다
 
@@ -277,7 +277,7 @@ df -h
 
 로드 밸런서 DNS 이름으로 JupyterHub 도메인에 대한 `CNAME` DNS 레코드를 ChangeIP에 추가합니다.
 
-![](img/CNAME.png)
+![](../img/CNAME.png)
 
 :::info
 ChangeIP의 CNAME 값 필드에 로드 밸런서 DNS 이름을 추가할 때 로드 밸런서 DNS 이름 끝에 점(`.`)을 추가해야 합니다.
@@ -285,15 +285,15 @@ ChangeIP의 CNAME 값 필드에 로드 밸런서 DNS 이름을 추가할 때 로
 
 이제 브라우저에서 도메인 URL을 입력하면 JupyterHub 로그인 페이지로 리디렉션됩니다.
 
-![](img/oauth.png)
+![](../img/oauth.png)
 
 Keycloak 가입 및 로그인 프로세스를 따라 로그인합니다.
 
-![](img/keycloak-login.png)
+![](../img/keycloak-login.png)
 
 성공적인 로그인은 로그인한 사용자를 위한 JupyterHub 환경을 엽니다.
 
-![](img/jupyter_launcher.png)
+![](../img/jupyter_launcher.png)
 
 
 <CollapsibleContent header={<h3><span>정리</span></h3>}>

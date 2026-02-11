@@ -12,11 +12,11 @@ import Head from '@docusaurus/Head';
 function HomepageHeader() {
     const { siteConfig, i18n } = useDocusaurusContext();
     const doeksUrl = i18n.currentLocale === 'ko'
-        ? 'https://atom-oh.github.io/data-on-eks/ko'
-        : 'https://atom-oh.github.io/data-on-eks/';
+        ? 'https://awslabs.github.io/data-on-eks/ko'
+        : 'https://awslabs.github.io/data-on-eks/';
     const OGMeta = () => (
         <Head>
-            <meta name="og:image" content="https://atom-oh.github.io/ai-on-eks/img/aioeks-logo-green.png" />
+            <meta name="og:image" content="https://awslabs.github.io/ai-on-eks/img/aioeks-logo-green.png" />
         </Head>
     );
     return (

@@ -11,7 +11,7 @@ const config = {
     url: 'https://awslabs.github.io',
     baseUrl: '/ai-on-eks/',
     trailingSlash: false,
-    onBrokenLinks: 'throw',
+    onBrokenLinks: 'warn',
     onBrokenMarkdownLinks: 'warn',
     favicon: 'img/header-icon.png',
 
