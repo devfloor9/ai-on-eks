@@ -31,11 +31,11 @@ Helm charts for deploying popular AI models on EKS with pre-configured values fo
 
 ---
 
-## [Framework-Specific Deployment Guides](/docs/blueprints/inference/framework-guides/)
+## Framework-Specific Deployment Guides
 
 Detailed guides for deploying specific models and frameworks on EKS, organized by hardware type.
 
-### [GPU Deployments](/docs/blueprints/inference/framework-guides/GPUs/)
+### GPU Deployments
 
 Step-by-step guides for deploying models on NVIDIA GPUs:
 
@@ -48,7 +48,7 @@ Step-by-step guides for deploying models on NVIDIA GPUs:
 - **[vLLM with NVIDIA Triton Server](/docs/blueprints/inference/framework-guides/GPUs/vLLM-NVIDIATritonServer)** - Production inference with Triton and vLLM
 - **[vLLM with Ray Serve](/docs/blueprints/inference/framework-guides/GPUs/vLLM-rayserve)** - Scalable inference with Ray Serve and vLLM
 
-### [Neuron Deployments](/docs/blueprints/inference/framework-guides/Neuron/)
+### Neuron Deployments
 
 Step-by-step guides for deploying models on AWS Inferentia and Trainium:
 
@@ -59,7 +59,7 @@ Step-by-step guides for deploying models on AWS Inferentia and Trainium:
 - **[Stable Diffusion on Inf2](/docs/blueprints/inference/framework-guides/Neuron/stablediffusion-inf2)** - Deploy Stable Diffusion on AWS Inferentia 2
 - **[vLLM Ray on Inf2](/docs/blueprints/inference/framework-guides/Neuron/vllm-ray-inf2)** - Deploy vLLM with Ray on AWS Inferentia 2
 
-[Explore Framework Guides →](/docs/blueprints/inference/framework-guides/)
+
 
 ---
 

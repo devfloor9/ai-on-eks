@@ -201,10 +201,10 @@ The [**Guidance section**](/docs/guidance/index.md) provides comprehensive best 
 Reduce model loading time from minutes to seconds, improving autoscaling responsiveness and development iteration speed.
 
 **Key Techniques**:
-- **[Reduce Image Size](/docs/guidance/container-startup-time/1-reduce-container-image-size/)**: Optimize container images to minimize pull time
-- **[Decouple Model Artifacts](/docs/guidance/container-startup-time/1-reduce-container-image-size/14-decoupling-model-artifacts)**: Separate model weights from container images
-- **[Accelerate Pull Process](/docs/guidance/container-startup-time/2-accelerate-pull-process/)**: Use containerd snapshotters and image pre-fetching
-- **[Pre-fetch on Nodes](/docs/guidance/container-startup-time/2-accelerate-pull-process/14-prefecthing-images-on-br)**: Warm up nodes with model images before workload scheduling
+- **[Reduce Image Size](/docs/guidance/container-startup-time/reduce-container-image-size/)**: Optimize container images to minimize pull time
+- **[Decouple Model Artifacts](/docs/guidance/container-startup-time/reduce-container-image-size/decoupling-model-artifacts)**: Separate model weights from container images
+- **[Accelerate Pull Process](/docs/guidance/container-startup-time/accelerate-pull-process/)**: Use containerd snapshotters and image pre-fetching
+- **[Pre-fetch on Nodes](/docs/guidance/container-startup-time/accelerate-pull-process/14-prefecthing-images-on-br)**: Warm up nodes with model images before workload scheduling
 
 **Impact**: Reduces startup time by 60-80%, enabling faster autoscaling and lower costs.
 
