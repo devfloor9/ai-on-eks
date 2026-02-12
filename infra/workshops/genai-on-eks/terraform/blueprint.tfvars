@@ -1,0 +1,13 @@
+name                     = "genai-workshop"
+enable_eks_auto_mode     = true
+enable_kube_prometheus_stack = true
+enable_grafana_operator  = true
+grafana_service_port     = 3000
+grafana_admin_password   = "notforproductionuse"
+kube_prometheus_stack_namespace = "monitoring"
+enable_amazon_prometheus = false
+enable_nvidia_dcgm_exporter = false
+enable_s3_models_storage = true
+s3_models_bucket_create  = false
+s3_models_additional_buckets = ["genai-models-*"]
+s3_models_sync_sa = "model-storage-sa"
