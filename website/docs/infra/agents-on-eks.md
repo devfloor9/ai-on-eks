@@ -111,7 +111,7 @@ Deployment takes approximately 20 minutes.
 After deployment, configure kubectl to access your cluster:
 
 ```bash
-aws eks update-kubeconfig --name aioeks-agents-on-eks --region us-west-2
+aws eks update-kubeconfig --name aioeks-agents --region us-west-2
 ```
 
 ## Accessing Services
