@@ -146,7 +146,7 @@ The MCP Gateway Registry will be available at `https://mcpregistry.<your-domain>
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `name` | Cluster name | `aioeks-agents-on-eks` |
+| `name` | Cluster name | `aioeks-agents` |
 | `region` | AWS region | `us-west-2` |
 | `eks_cluster_version` | EKS version | `1.34` |
 | `acm_certificate_domain` | Domain for TLS certificates | `""` (required) |
