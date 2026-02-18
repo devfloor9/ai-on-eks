@@ -15,7 +15,7 @@ Building and operating AI agents at scale requires more than just inference infr
 - **Persistent memory** for storing embeddings and enabling retrieval-augmented generation (RAG)
 - **Tool orchestration** for managing and discovering MCP (Model Context Protocol) servers
 
-This infrastructure brings together these components into a cohesive platform, enabling teams to iterate quickly on agent development while maintaining production-grade reliability.
+This infrastructure brings together these components into a cohesive platform, enabling teams to iterate quickly on agent development while maintaining reliability.
 
 ## Use Cases
 
@@ -95,7 +95,7 @@ enable_milvus               = true
 enable_mcp_gateway_registry = true
 max_user_namespaces         = 16384
 acm_certificate_domain      = "agents.example.com"  # Update with your domain
-allowed_inbound_cidrs       = "0.0.0.0/0"           # Restrict for production
+allowed_inbound_cidrs       = "0.0.0.0/0"           # Restrict inbound IPs
 ```
 
 ### Step 3: Deploy
@@ -159,7 +159,7 @@ The MCP Gateway Registry will be available at `https://mcpregistry.<your-domain>
 
 ### Restricting Inbound Access
 
-The `allowed_inbound_cidrs` variable controls which IP ranges can access services through the load balancer. For production deployments, restrict this to your organization's IP ranges:
+The `allowed_inbound_cidrs` variable controls which IP ranges can access services through the load balancer. Restrict this to your organization's IP ranges:
 
 ```hcl
 allowed_inbound_cidrs = "10.0.0.0/8,192.168.1.0/24"

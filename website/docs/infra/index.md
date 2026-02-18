@@ -53,7 +53,7 @@ Additional infrastructure solutions and utilities:
 1. **Choose Your Use Case**: Select training or inference based on your workload requirements
 2. **Deploy Infrastructure**: Follow the deployment guide for your chosen solution
 3. **Deploy Workloads**: Use the [Blueprints](../blueprints/index.md) to deploy your AI/ML workloads
-4. **Optimize**: Apply [Guidance](../guidance/index.md) best practices for production readiness
+4. **Optimize**: Apply [Guidance](../guidance/index.md) best practices
 
 ### Architecture Patterns
 
@@ -62,7 +62,7 @@ All infrastructure solutions follow these core principles:
 - **Modular Design**: Compose solutions from reusable modules
 - **Best Practices**: Built-in security, observability, and scalability
 - **Cloud Native**: Leverage Kubernetes and AWS services
-- **Production Ready**: Tested and validated for enterprise workloads
+- **Validated**: Tested and validated for enterprise workloads
 
 ## Resources
 
