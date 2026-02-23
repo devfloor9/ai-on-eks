@@ -12,7 +12,7 @@ import Head from '@docusaurus/Head';
 function HomepageHeader() {
     const { siteConfig, i18n } = useDocusaurusContext();
     const doeksUrl = i18n.currentLocale === 'ko'
-        ? 'https://awslabs.github.io/data-on-eks/ko'
+        ? 'https://awslabs.github.io/data-on-eks/'
         : 'https://awslabs.github.io/data-on-eks/';
     const OGMeta = () => (
         <Head>

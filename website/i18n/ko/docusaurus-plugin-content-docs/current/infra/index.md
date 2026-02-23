@@ -29,8 +29,8 @@ AI/ML 모델 학습 워크로드에 최적화된 인프라 솔루션:
 AI/ML 모델 추론 워크로드에 최적화된 인프라 솔루션:
 
 - **[추론 준비 클러스터](./inference/inference-ready-cluster.md)** - 추론 워크로드를 위해 사전 구성된 EKS 클러스터
-- **[Nvidia NIM on EKS](/docs/blueprints/inference/framework-guides/GPUs/nvidia-nim-llama3)** - Nvidia NIM 배포 샘플
-- **[Nvidia Dynamo on EKS](/docs/blueprints/inference/framework-guides/GPUs/nvidia-dynamo)** - Nvidia Dynamo 배포 샘플
+- **[Nvidia NIM on EKS](../blueprints/inference/framework-guides/GPUs/nvidia-nim-llama3.md)** - Nvidia NIM 배포 샘플
+- **[Nvidia Dynamo on EKS](../blueprints/inference/framework-guides/GPUs/nvidia-dynamo.md)** - Nvidia Dynamo 배포 샘플
 
 ### 기타
 

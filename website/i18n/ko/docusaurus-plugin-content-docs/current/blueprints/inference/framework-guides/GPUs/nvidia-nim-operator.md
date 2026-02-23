@@ -21,7 +21,7 @@ import CollapsibleContent from '@site/src/components/CollapsibleContent';
 
 - [`NIMCache`](https://docs.nvidia.com/nim-operator/latest/cache.html)
 - [`NIMService`](https://docs.nvidia.com/nim-operator/latest/service.html)
-- [`NIMPipeline`] (https://docs.nvidia.com/nim-operator/latest/pipelines.html)
+- [`NIMPipeline`](https://docs.nvidia.com/nim-operator/latest/pipelines.html)
 
 이러한 CRD를 통해 네이티브 Kubernetes 구문을 사용하여 모델 배포를 선언적으로 정의할 수 있습니다.
 

@@ -127,7 +127,7 @@ from starlette.routing import Mount
 app = FastAPI()
 
 class Deployment:
-    def _init__(selfself, **kwargs):
+    def __init__(self, **kwargs):
         ...
         route = Mount("/metrics", make_asgi_app())
         # Workaround for 307 Redirect for /metrics
