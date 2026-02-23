@@ -131,17 +131,17 @@ LLM 및 생성형 AI 애플리케이션이 점점 보편화됨에 따라 효율�
   - 모델 읽기 권한이 있는 액세스 토큰 생성
   - `HF_TOKEN` 환경 변수로 설정하거나 배포 중 대화형으로 제공
 
-<CollapsibleContent header={<h2><span>솔루션 배포</span></h2>}>
+<CollapsibleContent header={<h2 id="deploying-the-solution"><span>솔루션 배포</span></h2>}>
 
 Amazon EKS에 NVIDIA Dynamo를 배포하려면 다음 단계를 완료하십시오:
 
-### 1단계: 저장소 클론
+<h3 id="step-1-clone-the-repository">1단계: 저장소 클론</h3>
 
 ```bash
 git clone https://github.com/awslabs/ai-on-eks.git && cd ai-on-eks
 ```
 
-### 2단계: 인프라 및 플랫폼 배포
+<h3 id="step-2-deploy-infrastructure-and-platform">2단계: 인프라 및 플랫폼 배포</h3>
 
 인프라 디렉토리로 이동하고 설치 스크립트를 실행합니다:
 
@@ -159,7 +159,7 @@ cd infra/nvidia-dynamo
 
 **소요 시간**: 15-30분
 
-### 3단계: 추론 예제 배포
+<h3 id="step-3-deploy-inference-examples">3단계: 추론 예제 배포</h3>
 
 사전 빌드된 [NGC 컨테이너 이미지](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/ai-dynamo/containers)를 사용하여 간소화된 배포 스크립트로 추론 서비스를 배포합니다:
 

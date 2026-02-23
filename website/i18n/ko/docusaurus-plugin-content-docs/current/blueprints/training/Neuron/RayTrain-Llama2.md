@@ -71,7 +71,7 @@ Volcano의 Gang 스케줄링은 작업(또는 "Gang")의 모든 파드가 동시
 
 ## 1. 솔루션 배포
 
-<CollapsibleContent header={<h2><span>사전 요구사항</span></h2>}>
+<CollapsibleContent header={<h2 id="prerequisites"><span>사전 요구사항</span></h2>}>
     시작하기 전에 배포 프로세스를 원활하고 번거롭지 않게 만들기 위해 모든 사전 요구사항이 준비되어 있는지 확인하세요.
     EC2 또는 Cloud9 인스턴스에 다음 도구가 설치되어 있는지 확인하세요.
 
@@ -133,7 +133,7 @@ Volcano의 Gang 스케줄링은 작업(또는 "Gang")의 모든 파드가 동시
     ./install.sh
     ```
 
-    ### 리소스 확인
+    <h3 id="verify-the-resources">리소스 확인</h3>
 
     Amazon EKS 클러스터 확인
 

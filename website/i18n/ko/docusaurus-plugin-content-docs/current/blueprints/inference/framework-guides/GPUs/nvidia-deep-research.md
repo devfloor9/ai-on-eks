@@ -347,13 +347,13 @@ cd ai-on-eks
 
 이 블루프린트는 두 가지 배포 방법을 제공합니다:
 
-<CollapsibleContent header={<h2><span>옵션 A: 자동화된 배포 (권장)</span></h2>}>
+<CollapsibleContent header={<h2 id="option-a-automated-deployment-recommended"><span>옵션 A: 자동화된 배포 (권장)</span></h2>}>
 
 제공된 bash 스크립트를 사용하여 전체 배포 프로세스를 자동화합니다.
 
-> **팁**: 전체 구성 제어가 포함된 자세한 수동 배포 단계는 아래 [옵션 B: 수동 배포](#옵션-b-수동-배포)를 참조하십시오.
+> **팁**: 전체 구성 제어가 포함된 자세한 수동 배포 단계는 아래 [옵션 B: 수동 배포](#option-b-manual-deployment)를 참조하십시오.
 
-### 1단계: 인프라 배포
+<h3 id="step-1-deploy-infrastructure">1단계: 인프라 배포</h3>
 
 인프라 디렉토리로 이동하고 설치 스크립트를 실행합니다:
 
@@ -373,7 +373,7 @@ cd infra/nvidia-deep-research
 
 > **인프라 준비 완료**: Terraform이 성공적으로 완료되면 인프라가 배포되어 준비됩니다.
 
-### 2단계: 환경 설정
+<h3 id="step-2-setup-environment">2단계: 환경 설정</h3>
 
 설정 스크립트를 실행하여 환경을 구성합니다:
 
@@ -388,7 +388,7 @@ cd infra/nvidia-deep-research
 - GPU 노드를 위한 Karpenter 제한 패치
 - `.env` 파일에 구성 저장
 
-### 3단계: OpenSearch 이미지 빌드
+<h3 id="step-3-build-opensearch-images">3단계: OpenSearch 이미지 빌드</h3>
 
 RAG 소스를 클론하고 OpenSearch를 통합하고 사용자 정의 Docker 이미지를 빌드합니다:
 
@@ -398,7 +398,7 @@ RAG 소스를 클론하고 OpenSearch를 통합하고 사용자 정의 Docker �
 
 **대기 시간**: 이미지 빌드에 10-15분
 
-### 4단계: 애플리케이션 배포
+<h3 id="step-4-deploy-applications">4단계: 애플리케이션 배포</h3>
 
 사용 사례에 따라 선택하십시오:
 
@@ -459,11 +459,11 @@ RAG와 AI-Q를 병렬로 배포합니다:
 
 </CollapsibleContent>
 
-<CollapsibleContent header={<h2><span>옵션 B: 수동 배포</span></h2>}>
+<CollapsibleContent header={<h2 id="option-b-manual-deployment"><span>옵션 B: 수동 배포</span></h2>}>
 
 각 구성 요소와 구성을 이해하기 위한 자세한 수동 단계를 따르십시오. 학습, 사용자 정의 또는 문제 해결에 이상적입니다.
 
-### 1단계: 인프라 배포
+<h3 id="step-1-deploy-infrastructure-1">1단계: 인프라 배포</h3>
 
 인프라 디렉토리로 이동합니다:
 
@@ -488,7 +488,7 @@ cd infra/nvidia-deep-research
 
 > **인프라 준비 완료**: Terraform이 성공적으로 완료되면 인프라가 배포되어 준비됩니다.
 
-### 2단계: 환경 설정
+<h3 id="step-2-setup-environment-1">2단계: 환경 설정</h3>
 
 kubectl을 구성하고 필요한 환경 변수를 설정합니다:
 
@@ -523,7 +523,7 @@ export NGC_API_KEY="<YOUR_NGC_API_KEY>"
 export TAVILY_API_KEY="<YOUR_TAVILY_API_KEY>"  # RAG만 배포하거나 웹 검색 없는 AI-Q의 경우 생략
 ```
 
-### 3단계: [Karpenter](https://karpenter.sh/) NodePool 제한 구성
+<h3 id="step-3-configure-karpenter-nodepool-limits">3단계: Karpenter NodePool 제한 구성</h3>
 
 G5 GPU NodePool의 메모리 제한을 늘립니다:
 
@@ -533,7 +533,7 @@ kubectl patch nodepool g5-gpu-karpenter --type='json' -p='[{"op": "replace", "pa
 
 이를 통해 [Karpenter](https://karpenter.sh/)가 모든 모델에 충분한 GPU 노드를 프로비저닝할 수 있습니다 (1000Gi에서 2000Gi로).
 
-### 4단계: OpenSearch 통합 및 Docker 이미지 빌드
+<h3 id="step-4-integrate-opensearch-and-build-docker-images">4단계: OpenSearch 통합 및 Docker 이미지 빌드</h3>
 
 RAG 소스 코드를 클론하고 OpenSearch 구현을 추가합니다:
 
@@ -563,7 +563,7 @@ aws ecr get-login-password --region ${REGION} | docker login --username AWS --pa
 
 **대기 시간**: 이미지 빌드에 10-15분
 
-### 5단계: Enterprise RAG Blueprint 배포
+<h3 id="step-5-deploy-enterprise-rag-blueprint">5단계: Enterprise RAG Blueprint 배포</h3>
 
 OpenSearch 지원 이미지를 사용하여 RAG Blueprint를 배포합니다:
 
@@ -662,9 +662,9 @@ kubectl create configmap nvidia-dcgm-exporter-dashboard \
 
 **AI-Q Research Assistant 배포 (선택 사항)**
 
-> **배포 선택**: 웹 검색 기능이 있는 자동화된 연구 보고서 생성이 필요한 경우 이러한 구성 요소를 배포하십시오. 사용 사례가 문서 Q&A용 Enterprise RAG Blueprint만 필요한 경우 [서비스 액세스](#서비스-액세스)로 진행하십시오.
+> **배포 선택**: 웹 검색 기능이 있는 자동화된 연구 보고서 생성이 필요한 경우 이러한 구성 요소를 배포하십시오. 사용 사례가 문서 Q&A용 Enterprise RAG Blueprint만 필요한 경우 [서비스 액세스](#access-services)로 진행하십시오.
 
-### 6단계: AI-Q 구성 요소 배포
+<h3 id="step-6-deploy-ai-q-components">6단계: AI-Q 구성 요소 배포</h3>
 
 AI-Q Research Assistant를 배포합니다:
 
@@ -999,13 +999,13 @@ cd ../../../infra/nvidia-deep-research
 
 ## 비용 고려 사항
 
-<CollapsibleContent header={<h3><span>이 배포의 예상 비용</span></h3>}>
+<CollapsibleContent header={<h3 id="estimated-costs-for-this-deployment"><span>이 배포의 예상 비용</span></h3>}>
 
 :::warning 중요
 GPU 인스턴스와 지원 인프라는 실행 상태로 유지되면 상당한 비용이 발생할 수 있습니다. 예상치 못한 요금을 피하려면 **사용하지 않을 때는 항상 리소스를 정리하십시오.**
 :::
 
-### 예상 월간 비용
+<h3 id="estimated-monthly-costs">예상 월간 비용</h3>
 
 다음 표는 US West 2 (Oregon) 리전의 **기본 배포**에 대한 대략적인 비용을 보여줍니다. 실제 비용은 리전, 사용 패턴 및 워크로드 기간에 따라 달라집니다.
 
@@ -1022,7 +1022,7 @@ GPU 인스턴스와 지원 인프라는 실행 상태로 유지되면 상당한 
 
 **\*GPU 인스턴스 비용은 연속 운영을 가정합니다. 아래 세부 정보를 참조하십시오.**
 
-### GPU 인스턴스 비용 세부 정보
+<h3 id="gpu-instance-cost-breakdown">GPU 인스턴스 비용 세부 정보</h3>
 
 GPU 인스턴스는 **주요 비용 요소**입니다. 비용은 인스턴스 유형과 실행 기간에 따라 달라집니다:
 

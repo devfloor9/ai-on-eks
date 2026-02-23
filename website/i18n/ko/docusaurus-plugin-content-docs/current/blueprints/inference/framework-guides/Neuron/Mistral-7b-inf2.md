@@ -47,7 +47,7 @@ Amazon EKS에서 `Mistral-7B-Instruct-v0.2` 모델을 시작하고 실행해 봅
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 4. [envsubst](https://pypi.org/project/envsubst/)
 
-### 배포
+<h3 id="deploy">배포</h3>
 
 저장소 클론
 
@@ -66,7 +66,7 @@ cd ai-on-eks/infra/trainium-inferentia/
 ./install.sh
 ```
 
-### 리소스 확인
+<h3 id="verify-the-resources">리소스 확인</h3>
 
 Amazon EKS 클러스터 확인
 

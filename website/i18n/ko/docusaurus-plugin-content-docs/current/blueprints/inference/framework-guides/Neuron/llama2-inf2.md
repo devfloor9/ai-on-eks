@@ -94,7 +94,7 @@ Llama-2 챗봇을 확장하기 위해 회사는 여러 Inferentia2 인스턴스�
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-### 배포
+<h3 id="deploy">배포</h3>
 
 저장소 클론
 
@@ -113,7 +113,7 @@ cd ai-on-eks/infra/trainium-inferentia/ && chmod +x install.sh
 ./install.sh
 ```
 
-### 리소스 확인
+<h3 id="verify-the-resources">리소스 확인</h3>
 
 Amazon EKS 클러스터 확인
 

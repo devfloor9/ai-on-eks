@@ -46,11 +46,11 @@ Envoy AI Gateway는 다음 CRD를 도입합니다:
 - 다중 모델 라우팅
 - 속도 제한
 
-<CollapsibleContent header={<h2><span>솔루션 배포</span></h2>}>
+<CollapsibleContent header={<h2 id="deploying-the-solution"><span>솔루션 배포</span></h2>}>
 
 Terraform Infrastructure as Code (IaC) 템플릿을 사용하여 Amazon EKS 클러스터를 배포하고, 추론 차트를 사용하여 모델을 배포할 때 Karpenter를 사용하여 GPU 노드를 동적으로 스케일링합니다.
 
-### 사전 요구사항
+<h3 id="prerequisites">사전 요구사항</h3>
 
 시작하기 전에 배포 프로세스를 원활하게 만들기 위해 필요한 모든 사전 요구사항이 준비되어 있는지 확인하세요. 머신에 다음 도구가 설치되어 있는지 확인하세요:
 
@@ -59,7 +59,7 @@ Terraform Infrastructure as Code (IaC) 템플릿을 사용하여 Amazon EKS 클�
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 4. [envsubst](https://pypi.org/project/envsubst/)
 
-### 배포
+<h3 id="deploy">배포</h3>
 
 저장소 클론
 
@@ -81,7 +81,7 @@ git clone https://github.com/awslabs/ai-on-eks.git
 cd ai-on-eks/infra/envoy-ai-gateway/ && chmod +x install.sh
 ./install.sh
 ```
-### 리소스 확인
+<h3 id="verify-the-resources">리소스 확인</h3>
 
 설치가 완료되면 Amazon EKS 클러스터를 확인합니다.
 

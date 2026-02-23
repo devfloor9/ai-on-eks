@@ -43,7 +43,8 @@ Amazon EKS에서 mistralai/Mistral-7B-Instruct-v0.2를 배포하려면 이 가�
 
 :::
 
-### 사전 요구 사항
+<h3 id="prerequisites">사전 요구 사항</h3>
+
 시작하기 전에 배포 과정을 원활하게 진행하기 위해 모든 사전 요구 사항이 갖춰져 있는지 확인하세요. 머신에 다음 도구가 설치되어 있는지 확인하세요:
 
 :::info
@@ -57,7 +58,7 @@ Amazon EKS에서 mistralai/Mistral-7B-Instruct-v0.2를 배포하려면 이 가�
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 4. [envsubst](https://pypi.org/project/envsubst/)
 
-### 배포
+<h3 id="deploy">배포</h3>
 
 저장소 복제
 
@@ -80,7 +81,7 @@ cd ai-on-eks/infra/jark-stack/ && chmod +x install.sh
 ./install.sh
 ```
 
-### 리소스 확인
+<h3 id="verify-the-resources">리소스 확인</h3>
 
 설치가 완료되면 Amazon EKS 클러스터를 확인합니다.
 

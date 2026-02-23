@@ -27,7 +27,7 @@ G5 인스턴스는 `24 GiB` 메모리의 단일 `A10G` GPU를 제공하여 인�
 vLLM을 사용하여 메모리 활용을 최적화하여 OOM(메모리 부족) 충돌을 방지하면서 추론 속도를 최대화합니다.
 
 
-<CollapsibleContent header={<h2><span>EKS 클러스터 및 애드온 배포</span></h2>}>
+<CollapsibleContent header={<h2 id="deploying-eks-cluster-and-addons"><span>EKS 클러스터 및 애드온 배포</span></h2>}>
 
 기술 스택은 다음을 포함합니다:
 
@@ -40,7 +40,8 @@ vLLM을 사용하여 메모리 활용을 최적화하여 OOM(메모리 부족) �
 - [Karpenter](https://karpenter.sh/) - G5 인스턴스와 같은 컴퓨팅 리소스를 동적으로 프로비저닝하고 관리하여 애플리케이션 가용성과 클러스터 효율성을 향상시키는 오픈소스 Kubernetes 클러스터 오토스케일러
 
 
-### 사전 요구 사항
+<h3 id="prerequisites">사전 요구 사항</h3>
+
 시작하기 전에 배포 과정을 원활하게 진행하기 위해 필요한 모든 사전 요구 사항이 갖춰져 있는지 확인하세요. 머신에 다음 도구가 설치되어 있는지 확인하세요:
 
 :::info
@@ -54,7 +55,7 @@ vLLM을 사용하여 메모리 활용을 최적화하여 OOM(메모리 부족) �
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 4. [envsubst](https://pypi.org/project/envsubst/)
 
-### 배포
+<h3 id="deploy">배포</h3>
 
 저장소 복제
 
@@ -80,7 +81,7 @@ cd ai-on-eks/infra/jark-stack && chmod +x install.sh
 ./install.sh
 ```
 
-### 리소스 확인
+<h3 id="verify-the-resources">리소스 확인</h3>
 
 설치가 완료되면 Amazon EKS 클러스터를 확인합니다.
 
