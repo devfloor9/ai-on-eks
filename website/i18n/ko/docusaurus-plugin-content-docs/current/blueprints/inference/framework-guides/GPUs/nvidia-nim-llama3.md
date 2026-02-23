@@ -48,7 +48,7 @@ NIM은 모델/모델 패밀리별로 컨테이너 이미지로 패키징됩니�
 
 이러한 구성 요소를 결합하여 제안된 솔루션은 대규모 언어 모델에 맞춤화된 강력하고 비용 효율적인 모델 서빙 인프라를 제공합니다. NVIDIA NIM의 원활한 통합과 Karpenter를 통한 Amazon EKS의 확장성으로 고객은 인프라 비용을 최소화하면서 높은 성능을 달성할 수 있습니다.
 
-![NIM on EKS Architecture](../img/nim-on-eks-arch.png)
+![NIM on EKS Architecture](../../img/nim-on-eks-arch.png)
 
 ## 솔루션 배포
 
@@ -73,7 +73,7 @@ NVIDIA NIM을 시작하기 전에 다음 사항이 준비되어 있는지 확인
     - "Services Included" 드롭다운에서 최소한 "NGC Catalog"가 선택되어 있는지 확인합니다
     - API 키를 복사하고 안전하게 저장합니다. 키는 `nvapi-` 접두사가 있어야 합니다
 
-    ![NGC API KEY](../img/nim-ngc-api-key.png)
+    ![NGC API KEY](../../img/nim-ngc-api-key.png)
 
 **NGC API 키 검증 및 이미지 풀 테스트**
 
@@ -358,13 +358,13 @@ kubectl port-forward svc/open-webui 8081:80 -n openai-webui
 
 New Chat을 클릭하고 아래 스크린샷과 같이 드롭다운 메뉴에서 모델을 선택합니다:
 
-![alt text](../img/openweb-ui-nim-1.png)
+![alt text](../../img/openweb-ui-nim-1.png)
 
 **6. 테스트 프롬프트 입력**
 
 프롬프트를 입력하면 아래와 같이 스트리밍 결과가 표시됩니다:
 
-![alt text](../img/openweb-ui-nim-2.png)
+![alt text](../../img/openweb-ui-nim-2.png)
 
 ## NVIDIA GenAI-Perf 도구를 사용한 성능 테스트
 
@@ -467,11 +467,11 @@ NIM 상태를 더 잘 시각화하기 위해 사전 구성된 Grafana 대시보�
 
 더 많은 메트릭 설명은 이 [문서](https://docs.nvidia.com/nim/large-language-models/latest/observability.html)에서 찾을 수 있습니다.
 
-![NVIDIA LLM Server](../img/nim-dashboard.png)
+![NVIDIA LLM Server](../../img/nim-dashboard.png)
 
 Time-to-First-Token, Inter-Token-Latency, KV Cache Utilization 메트릭 등을 모니터링할 수 있습니다.
 
-![NVIDIA NIM Metrics](../img/nim-dashboard-2.png)
+![NVIDIA NIM Metrics](../../img/nim-dashboard-2.png)
 
 이러한 메트릭을 모니터링하기 위해 Grafana 대시보드를 보려면 아래 단계를 따르세요:
 

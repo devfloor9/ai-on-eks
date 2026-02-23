@@ -147,7 +147,7 @@ kuberay-operator-7894df98dc-447pm   1/1     Running   0          9h
 
 **1단계:** 이 배포의 사전 요구 사항으로 Hugging Face 계정을 통해 모델에 접근할 수 있는지 확인해야 합니다:
 
-![mistral7b-hg.png](../img/mistral7b-hg.png)
+![mistral7b-hg.png](../../img/mistral7b-hg.png)
 
 
 **2단계:** Hugginface Hub 토큰 내보내기
@@ -213,11 +213,11 @@ kubectl -n rayserve-vllm port-forward svc/vllm 8265:8265
 
 그런 다음 [http://localhost:8265](http://localhost:8265)에서 웹 UI에 접근할 수 있으며, Ray 에코시스템 내의 작업 및 액터 배포가 표시됩니다.
 
-![RayServe Deployment](../img/ray-dashboard-vllm-mistral.png)
+![RayServe Deployment](../../img/ray-dashboard-vllm-mistral.png)
 
 배포가 완료되면 Controller 및 Proxy 상태가 `HEALTHY`이고 Application 상태가 `RUNNING`이어야 합니다
 
-![RayServe Deployment Logs](../img/ray-deplo-logs-vllm-mistral.png)
+![RayServe Deployment Logs](../../img/ray-deplo-logs-vllm-mistral.png)
 
 ## Mistral-7b 채팅 모델 테스트
 이제 Mistral-7B 채팅 모델을 테스트할 차례입니다. Python 클라이언트 스크립트를 사용하여 RayServe 추론 엔드포인트에 프롬프트를 보내고 모델이 생성한 출력을 확인합니다. 스크립트는 `prompts.txt` 파일에서 프롬프트를 읽고 응답을 같은 위치의 `results.txt` 파일에 씁니다. 또한 각 응답에 대한 응답 시간과 토큰 길이를 기록합니다.
@@ -440,7 +440,7 @@ kubectl port-forward prometheus-kube-prometheus-stack-prometheus-0 -n kube-prome
    - podMonitor/kube-prometheus-stack/ray-workers-monitor/0 (1/1 up)
    - serviceMonitor/kube-prometheus-stack/ray-head-monitor/0 (2/2 up)
 
-![RayServe Prometheus](../img/ray-prometheus.png)
+![RayServe Prometheus](../../img/ray-prometheus.png)
 
 **Grafana 접근**
 
@@ -480,7 +480,7 @@ TODO: 대시보드를 수동으로 가져오는 것은 이상적이지 않습니
 - **Scheduler Actor State**는 특정 상태에 있는 현재 액터 수를 보여줍니다.
 - **Active Actors by Name**은 특정 이름을 가진 현재(활성) 액터 수를 표시합니다.
 
-![RayServe Grafana](../img/ray-grafana-dashboard.png)
+![RayServe Grafana](../../img/ray-grafana-dashboard.png)
 
 ## 결론
 Ray Serve를 vLLM 백엔드와 통합하면 효율성, 확장성, 비용 효율성 측면에서 대규모 언어 모델(LLM) 추론에 많은 이점을 제공합니다. Ray Serve의 동시 요청 처리 및 동적 배칭 기능은 고처리량 LLM 애플리케이션에 중요한 최적의 GPU 활용을 보장합니다. vLLM과의 통합은 정적 배칭에 비해 처리량을 크게 향상시키고 지연 시간을 줄이는 연속 배칭을 가능하게 하여 이를 더욱 향상시킵니다. 전반적으로 Ray Serve와 vLLM의 조합은 프로덕션에서 LLM을 배포하기 위한 강력하고 확장 가능하며 비용 효율적인 솔루션을 제공합니다.

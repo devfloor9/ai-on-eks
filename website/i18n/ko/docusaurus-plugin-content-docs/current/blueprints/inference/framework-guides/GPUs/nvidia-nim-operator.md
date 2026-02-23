@@ -15,7 +15,7 @@ import CollapsibleContent from '@site/src/components/CollapsibleContent';
 
 **NVIDIA NIM Operator**는 Kubernetes 클러스터에서 NVIDIA NIM 마이크로서비스의 배포, 확장 및 관리를 자동화하는 Kubernetes 오퍼레이터입니다.
 
-![NVIDIA NIM Operator 아키텍처](../img/NIMOperatorArchitecture.png)
+![NVIDIA NIM Operator 아키텍처](../../img/NIMOperatorArchitecture.png)
 
 컨테이너를 수동으로 가져오거나, GPU 노드를 프로비저닝하거나, 모든 모델에 대해 YAML을 작성하는 대신, NIM Operator는 세 가지 주요 [Custom Resource Definition(CRD)](https://docs.nvidia.com/nim-operator/latest/crds.html)을 도입합니다:
 
@@ -76,7 +76,7 @@ Operator가 처리하는 작업:
 
 이 배포 블루프린트는 **NVIDIA NIM Operator**를 사용하여 **Amazon EKS**에서 다중 GPU 지원과 빠른 시작 시간을 위한 최적화된 모델 캐싱을 통해 **Meta Llama 3.1 8B Instruct** 모델을 실행하는 방법을 보여줍니다.
 
-![NVIDIA NIM Operator 아키텍처](../img/NIMOperatoronEKS.png)
+![NVIDIA NIM Operator 아키텍처](../../img/NIMOperatoronEKS.png)
 
 모델은 다음을 사용하여 서빙됩니다:
 - **G5 인스턴스 (g5.12xlarge)**: **4개의 NVIDIA A10G GPU**가 장착된 인스턴스
@@ -133,7 +133,7 @@ NVIDIA NIM을 시작하기 전에 다음을 확인하십시오:
     - "Services Included" 드롭다운에서 최소한 "NGC Catalog"가 선택되어 있는지 확인합니다
     - API 키를 복사하고 안전하게 저장합니다. 키는 `nvapi-` 접두사가 있어야 합니다
 
-    ![NGC API KEY](../img/nim-ngc-api-key.png)
+    ![NGC API KEY](../../img/nim-ngc-api-key.png)
 
 **NGC API 키 검증 및 이미지 풀 테스트**
 
@@ -430,13 +430,13 @@ kubectl port-forward svc/open-webui 8081:80 -n openai-webui
 
 아래 스크린샷과 같이 드롭다운 메뉴에서 모델을 선택하고 New Chat을 클릭합니다:
 
-![alt text](../img/openweb-ui-nim-1.png)
+![alt text](../../img/openweb-ui-nim-1.png)
 
 **6. 테스트 프롬프트 입력**
 
 프롬프트를 입력하면 아래와 같이 스트리밍 결과를 볼 수 있습니다:
 
-![alt text](../img/openweb-ui-nim-2.png)
+![alt text](../../img/openweb-ui-nim-2.png)
 
 ## NVIDIA GenAI-Perf 도구를 사용한 성능 테스트
 
@@ -475,7 +475,7 @@ genai-perf profile -m meta/llama-3.1-8b-instruct \
 
 다음과 유사한 출력이 표시됩니다
 
-![NIM Operator genai-perf 결과](../img/nim-operator-genaiperf.png)
+![NIM Operator genai-perf 결과](../../img/nim-operator-genaiperf.png)
 
 genai-perf가 수집하는 [메트릭](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/perf_analyzer/genai-perf/README.html#metrics)(Request latency, Output token throughput, Request throughput 포함)을 볼 수 있습니다.
 
@@ -493,11 +493,11 @@ NVIDIA는 NIM 상태를 더 잘 시각화하기 위한 Grafana [대시보드](ht
 
 더 많은 메트릭 설명은 이 [문서](https://docs.nvidia.com/nim/large-language-models/latest/observability.html)에서 찾을 수 있습니다.
 
-![NVIDIA LLM Server](../img/nim-dashboard.png)
+![NVIDIA LLM Server](../../img/nim-dashboard.png)
 
 Time-to-First-Token, Inter-Token-Latency, KV Cache Utilization 메트릭과 같은 지표를 모니터링할 수 있습니다.
 
-![NVIDIA NIM Metrics](../img/nim-dashboard-2.png)
+![NVIDIA NIM Metrics](../../img/nim-dashboard-2.png)
 
 이러한 메트릭을 모니터링하기 위한 Grafana 대시보드를 보려면 아래 단계를 따르십시오:
 

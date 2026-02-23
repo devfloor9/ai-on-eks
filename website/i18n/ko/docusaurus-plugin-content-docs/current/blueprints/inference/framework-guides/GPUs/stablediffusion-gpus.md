@@ -182,11 +182,11 @@ kubectl port-forward svc/stablediffusion-service 8266:8265 -n stablediffusion
 
 `http://localhost:8265`에서 웹 UI에 접근하세요. 이 인터페이스는 Ray 에코시스템 내의 작업 및 액터 배포를 표시합니다.
 
-![RayServe Deployment](../img/ray-serve-gpu-sd.png)
+![RayServe Deployment](../../img/ray-serve-gpu-sd.png)
 
 제공된 스크린샷은 Serve 배포와 Ray 클러스터 배포를 보여주며, 설정 및 운영 상태에 대한 시각적 개요를 제공합니다.
 
-![RayServe Cluster](../img/ray-serve-gpu-sd-cluster.png)
+![RayServe Cluster](../../img/ray-serve-gpu-sd-cluster.png)
 
 ## Gradio WebUI 앱 배포
 배포된 모델과 원활하게 통합되는 [Gradio](https://www.gradio.app/)를 사용하여 사용자 친화적인 채팅 인터페이스를 만드는 방법을 알아보세요.
@@ -232,7 +232,7 @@ docker run --rm -it \
 
 이제 로컬 머신에서 Gradio 애플리케이션과 상호 작용할 수 있습니다.
 
-![Gradio Output](../img/gradio-app-gpu.png)
+![Gradio Output](../../img/gradio-app-gpu.png)
 
 ### Ray 자동 스케일링
 `ray-serve-stablediffusion.yaml` 파일에 자세히 설명된 Ray 자동 스케일링 구성은 Kubernetes에서 Ray의 기능을 활용하여 계산 요구에 따라 애플리케이션을 동적으로 스케일링합니다.

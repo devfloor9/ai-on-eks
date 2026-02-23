@@ -21,9 +21,9 @@ Ray 클러스터의 핵심 구성 요소는 작업 스케줄링, 상태 동기�
 
 이를 해결하기 위해 Ray head 노드의 고가용성(HA)이 필수적입니다. Global Control Service (GCS)는 RayCluster에서 클러스터 수준 메타데이터를 관리합니다. 기본적으로 GCS는 모든 데이터를 메모리에 저장하므로 장애 허용이 없으며, 실패 시 전체 Ray 클러스터가 실패할 수 있습니다. 이를 방지하려면 Ray의 Global Control Store (GCS)에 장애 허용을 추가해야 하며, 이를 통해 head 노드가 충돌해도 Ray Serve 애플리케이션이 트래픽을 서빙할 수 있습니다. GCS가 재시작되면 Redis 인스턴스에서 모든 데이터를 검색하고 정상 기능을 재개합니다.
 
-![Ray-head-worker-redis](../img/ray-head-ha-1.png)
+![Ray-head-worker-redis](../../img/ray-head-ha-1.png)
 
-![Ray-head-ha](../img/ray-head-ha-2.png)
+![Ray-head-ha](../../img/ray-head-ha-2.png)
 
 다음 섹션에서는 GCS 장애 허용을 활성화하고 Ray head Pod의 고가용성을 보장하는 방법에 대한 단계를 제공합니다. `Mistral-7B-Instruct-v0.2` 모델을 사용하여 Ray head 고가용성을 시연합니다.
 
@@ -173,9 +173,9 @@ pod "mistral-raycluster-rf6l9-head-xxxxx" deleted
 
 Ray head Pod가 종료되고 자동 재시작될 때 Ray 워커 Pod가 계속 실행되는 것을 볼 수 있습니다. Lens IDE의 아래 스크린샷을 참조하십시오.
 
-![Head Pod Deletion](../img/head-pod-deleted.png)
+![Head Pod Deletion](../../img/head-pod-deleted.png)
 
-![Worker Pod Uninterrupted](../img/worker-pod-running.png)
+![Worker Pod Uninterrupted](../../img/worker-pod-running.png)
 
 #### Mistral AI Gradio 앱 테스트
 
@@ -187,11 +187,11 @@ Ray head Pod가 삭제된 동안 질문에 답할 수 있는지 Gradio UI 앱도
 
 Ray head Pod가 종료되고 복구되는 동안 Mistral AI Chat 인터페이스에 질문을 제출합니다. 아래 스크린샷에서 Ray head Pod가 삭제되고 복구되는 동안 채팅 애플리케이션이 실제로 트래픽을 서빙할 수 있음을 알 수 있습니다. GCS 장애 허용으로 인해 RayServe 서비스가 이 경우 재시작되지 않는 Ray 워커 Pod를 가리키기 때문입니다.
 
-![Gradio App Test HA](../img/gradio-test-ft.png)
+![Gradio App Test HA](../../img/gradio-test-ft.png)
 
-![Gradio App Test 1](../img/answer-1.png)
+![Gradio App Test 1](../../img/answer-1.png)
 
-![Gradio App Test Contd](../img/answer-1-contd.png)
+![Gradio App Test Contd](../../img/answer-1-contd.png)
 
 RayServe 애플리케이션에 엔드투엔드 장애 허용을 활성화하는 전체 가이드는 [Ray Guide](https://docs.ray.io/en/latest/serve/production-guide/fault-tolerance.html#add-end-to-end-fault-tolerance)를 참조하십시오.
 

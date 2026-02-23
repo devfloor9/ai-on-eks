@@ -16,7 +16,7 @@ AI on EKS 추론 차트는 GPU와 AWS Neuron(Inferentia/Trainium) 하드웨어 �
 
 - **VLLM** - 빠른 시작이 가능한 단일 노드 추론
 - **Ray-VLLM** - 자동 스케일링 기능이 있는 분산 추론
-- **Triton-VLLM** - 고급 기능이 있는 프로덕션 준비 추론 서버
+- **Triton-VLLM** - NVIDIA 추론 서버
 - **AIBrix** - AIBrix 전용 구성이 포함된 VLLM
 - **LeaderWorkerSet-VLLM** - 대규모 모델을 위한 멀티 노드 추론
 - **Diffusers** - 이미지 생성을 위한 Hugging Face Diffusers
@@ -28,7 +28,7 @@ GPU와 AWS Neuron(Inferentia/Trainium) 가속기 모두 이러한 프레임워�
 
 추론 차트를 배포하기 전에 다음 사항을 확인하세요:
 
-- GPU 또는 AWS Neuron 노드가 있는 Amazon EKS 클러스터([빠른 시작을 위한 추론 준비 클러스터](../../infra/inference-ready-cluster.md))
+- GPU 또는 AWS Neuron 노드가 있는 Amazon EKS 클러스터([빠른 시작을 위한 추론 준비 클러스터](../../infra/inference/inference-ready-cluster.md))
 - Helm 3.0+
 - GPU 배포의 경우: NVIDIA 디바이스 플러그인 설치됨
 - Neuron 배포의 경우: AWS Neuron 디바이스 플러그인 설치됨

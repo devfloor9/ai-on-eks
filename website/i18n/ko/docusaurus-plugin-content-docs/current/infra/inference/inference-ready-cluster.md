@@ -227,7 +227,7 @@ kubectl get svc,pod,deployment -A
 
 ## EKS에서의 추론
 
-EKS는 AI/ML 추론을 실행하기 위한 강력한 플랫폼입니다. EKS에서의 많은 추론 가능성에 대한 자세한 내용은 [추론](../blueprints/inference/index.md) 섹션을 확인하세요.
+EKS는 AI/ML 추론을 실행하기 위한 강력한 플랫폼입니다. EKS에서의 많은 추론 가능성에 대한 자세한 내용은 [추론](../../blueprints/inference/index.md) 섹션을 확인하세요.
 
 ### Inference Charts 통합
 
@@ -297,7 +297,7 @@ Grafana 대시보드 액세스:
 kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
 ```
 
-관측성 기능 사용에 대한 자세한 내용은 [관측성](../guidance/observability.md)을 참조하세요.
+관측성 기능 사용에 대한 자세한 내용은 [관측성](../../guidance/observability.md)을 참조하세요.
 
 ### 비용 최적화
 

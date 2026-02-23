@@ -8,7 +8,7 @@ import CollapsibleContent from '@site/src/components/CollapsibleContent';
 
 이 가이드에서는 [Amazon EKS](https://aws.amazon.com/eks/)에서 [Ray](https://docs.ray.io/en/latest/serve/getting_started.html)와 [vLLM](https://github.com/vllm-project/vllm) 백엔드를 사용하여 [DeepSeek-R1-Distill-Llama-8B](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B) 모델 추론을 배포하는 방법을 살펴봅니다.
 
-![alt text](../img/dseek0.png)
+![alt text](../../img/dseek0.png)
 
 ## GPU 메모리 요구 사항 이해
 
@@ -271,11 +271,11 @@ kubectl -n rayserve-vllm port-forward svc/vllm 8265:8265
 
 :::
 
-![alt text](../img/dseek1.png)
+![alt text](../../img/dseek1.png)
 
-![alt text](../img/dseek2.png)
+![alt text](../../img/dseek2.png)
 
-![alt text](../img/dseek3.png)
+![alt text](../../img/dseek3.png)
 
 
 ## DeepSeek-R1 모델 테스트
@@ -338,19 +338,19 @@ kubectl -n open-webui port-forward svc/open-webui 8080:80
 
 등록 페이지가 표시됩니다. 이름, 이메일, 비밀번호로 등록합니다.
 
-![alt text](../img/dseek4.png)
+![alt text](../../img/dseek4.png)
 
-![alt text](../img/dseek5.png)
+![alt text](../../img/dseek5.png)
 
-![alt text](../img/dseek6.png)
+![alt text](../../img/dseek6.png)
 
-![alt text](../img/dseek7.png)
+![alt text](../../img/dseek7.png)
 
-![alt text](../img/dseek8.png)
+![alt text](../../img/dseek8.png)
 
 요청을 제출한 후 GPU 및 CPU 사용량이 정상으로 돌아오는 것을 모니터링할 수 있습니다:
 
-![alt text](../img/dseek9.png)
+![alt text](../../img/dseek9.png)
 
 
 ## 주요 사항

@@ -65,7 +65,7 @@ Llama-3는 GPU에서 고성능 추론을 달성할 수 있지만, Neuron 가속�
 
 이 섹션에서는 Amazon EKS에서 Llama-3 모델, [Ray Serve](https://docs.ray.io/en/latest/serve/index.html) 및 [Inferentia2](https://aws.amazon.com/ec2/instance-types/inf2/)를 결합한 솔루션의 아키텍처를 자세히 살펴봅니다.
 
-![Llama-3-inf2](../img/ray-vllm-inf2.png)
+![Llama-3-inf2](../../img/ray-vllm-inf2.png)
 
 ## 솔루션 배포
 
@@ -240,11 +240,11 @@ kubectl -n vllm port-forward svc/vllm 8265:8265
 
 그런 다음 Ray 에코시스템 내의 작업 및 액터 배포를 표시하는 [http://localhost:8265](http://localhost:8265)에서 웹 UI에 액세스할 수 있습니다.
 
-![RayServe Deployment](../img/ray-dashboard-vllm-llama3-inf2.png)
+![RayServe Deployment](../../img/ray-dashboard-vllm-llama3-inf2.png)
 
 배포가 완료되면 Controller 및 Proxy 상태가 `HEALTHY`이고 Application 상태가 `RUNNING`이어야 합니다
 
-![RayServe Deployment Logs](../img/ray-logs-vllm-llama3-inf2.png)
+![RayServe Deployment Logs](../../img/ray-logs-vllm-llama3-inf2.png)
 
 ### Llama3 모델 테스트
 
@@ -342,7 +342,7 @@ Let me know if you have any other requests!
 
 container insights 및 Neuron Core 사용률, NeuronCore 메모리 사용량과 같은 Neuron 메트릭을 포함한 모든 메트릭은 Amazon CloudWatch로 전송되어 실시간으로 모니터링하고 분석할 수 있습니다. 배포가 완료되면 CloudWatch 콘솔에서 직접 이러한 메트릭에 액세스하여 워크로드를 효과적으로 관리하고 최적화할 수 있습니다.
 
-![CloudWatch-neuron-monitor](../img/neuron-monitor-cwci.png)
+![CloudWatch-neuron-monitor](../../img/neuron-monitor-cwci.png)
 
 ## Open WebUI 배포
 
@@ -383,13 +383,13 @@ kubectl port-forward svc/open-webui 8081:80 -n openai-webui
 
 아래 스크린샷과 같이 드롭다운 메뉴에서 모델을 선택하고 New Chat을 클릭합니다:
 
-![alt text](../img/openweb-ui-ray-vllm-inf2-1.png)
+![alt text](../../img/openweb-ui-ray-vllm-inf2-1.png)
 
 **6. 테스트 프롬프트 입력**
 
 프롬프트를 입력하면 아래와 같이 스트리밍 결과를 볼 수 있습니다:
 
-![alt text](../img/openweb-ui-ray-vllm-inf2-2.png)
+![alt text](../../img/openweb-ui-ray-vllm-inf2-2.png)
 
 ## LLMPerf 도구를 사용한 성능 벤치마킹
 

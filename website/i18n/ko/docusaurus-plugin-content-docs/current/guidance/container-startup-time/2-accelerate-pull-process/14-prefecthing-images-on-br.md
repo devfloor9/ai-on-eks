@@ -88,4 +88,4 @@ spec:
 
 # 종단 간 배포 예제
 
-종단 간 배포 예제는 [GPU에서의 Stable Diffusion](../../../blueprints/inference/GPUs/stablediffusion-gpus)에서 찾을 수 있습니다.
+종단 간 배포 예제는 [GPU에서의 Stable Diffusion](../../../blueprints/inference/framework-guides/GPUs/stablediffusion-gpus)에서 찾을 수 있습니다.

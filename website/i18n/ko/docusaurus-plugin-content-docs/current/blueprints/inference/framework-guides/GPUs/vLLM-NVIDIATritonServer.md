@@ -19,7 +19,7 @@ EKS에서 ML 모델을 배포하려면 GPU 또는 Neuron 인스턴스에 대한 
 
 NVIDIA Triton Inference Server는 vLLM 백엔드와 결합되어 여러 대규모 언어 모델(LLM)을 배포하기 위한 강력한 프레임워크를 제공합니다. 사용자 애플리케이션은 REST API 또는 gRPC를 통해 추론 서비스와 상호 작용하며, 이는 NGINX와 Network Load Balancer(NLB)에 의해 관리되어 수신 요청을 Triton K8s Service로 효율적으로 분배합니다. Triton K8s Service는 배포의 핵심으로, Triton Server가 추론 요청을 처리합니다. 이 배포에서는 4개의 GPU가 장착된 g5.24xlarge 인스턴스를 사용하여 Llama2-7b와 Mistral7b와 같은 여러 모델을 실행합니다. Horizontal Pod Autoscaler(HPA)는 사용자 정의 메트릭을 모니터링하고 수요에 따라 Triton 파드를 동적으로 스케일링하여 다양한 부하를 효율적으로 처리합니다. Prometheus와 Grafana는 메트릭을 수집하고 시각화하는 데 사용되어 성능에 대한 통찰력을 제공하고 자동 스케일링 결정을 지원합니다.
 
-![NVIDIA Triton Server](../img/triton-architecture.png)
+![NVIDIA Triton Server](../../img/triton-architecture.png)
 
 ## 예상 결과
 
@@ -75,7 +75,7 @@ Triton의 추론 기능의 핵심은 TensorRT-LLM 및 vLLM을 포함한 다양�
 **[vLLM](https://github.com/vllm-project/vllm)**: vLLM 백엔드는 다양한 LLM 워크로드를 처리하도록 특별히 설계되었습니다. 대규모 모델에 맞춤화된 효율적인 메모리 관리와 실행 파이프라인을 제공합니다. 이 백엔드는 메모리 리소스가 최적으로 사용되도록 보장하여 메모리 병목 현상 없이 매우 큰 모델을 배포할 수 있게 합니다. vLLM은 여러 대규모 모델을 동시에 서빙해야 하는 애플리케이션에 중요하며, 강력하고 확장 가능한 솔루션을 제공합니다.
 
 
-![NVIDIA Triton Server](../img/triton-internals.png)
+![NVIDIA Triton Server](../../img/triton-internals.png)
 
 ### Mistralai/Mistral-7B-Instruct-v0.2
 Mistralai/Mistral-7B-Instruct-v0.2는 고품질의 교육적 응답을 제공하도록 설계된 최첨단 대규모 언어 모델입니다. 다양한 데이터셋으로 훈련되어 다양한 주제에 대해 인간과 같은 텍스트를 이해하고 생성하는 데 뛰어납니다. 이 모델의 기능은 자세한 설명, 복잡한 쿼리, 자연어 이해가 필요한 애플리케이션에 적합합니다.
@@ -119,9 +119,9 @@ git clone https://github.com/awslabs/ai-on-eks.git
 
 **2단계**: 계속 진행하려면 Huggingface 계정을 사용하여 두 모델에 대한 접근 권한이 있는지 확인하세요:
 
-![mistral7b-hg.png](../img/mistral7b-hg.png)
+![mistral7b-hg.png](../../img/mistral7b-hg.png)
 
-![llma27b-hg.png](../img/llma27b-hg.png)
+![llma27b-hg.png](../../img/llma27b-hg.png)
 
 **3단계**: 다음으로 Huggingface 계정 토큰으로 환경 변수 TF_VAR_huggingface_token을 설정하세요:
   `export TF_VAR_huggingface_token=<your Huggingface token>`.
@@ -478,7 +478,7 @@ nvidia-triton-server-triton-inference-server-metrics   ClusterIP   172.20.5.247 
 - **Cumulative Inference Requests**: 이 그래프는 시간 경과에 따라 처리된 총 추론 요청 수를 보여주어 워크로드와 성능 추세에 대한 통찰력을 제공합니다.
 - **Queue Time (밀리초)**: 이 라인 그래프는 요청이 처리되기 전에 큐에서 보내는 시간을 나타내며, 시스템의 잠재적 병목 현상을 강조합니다.
 
-![NVIDIA Triton Server](../img/triton-observability.png)
+![NVIDIA Triton Server](../../img/triton-observability.png)
 
 이러한 메트릭을 모니터링하기 위한 새 Grafana 대시보드를 만들려면 아래 단계를 따르세요:
 
@@ -508,7 +508,7 @@ aws secretsmanager get-secret-value --secret-id <grafana_secret_name_output> --r
 
 이제 새 Grafana 대시보드에 표시된 메트릭을 볼 수 있어 NVIDIA Triton Inference Server 배포의 성능과 상태를 모니터링할 수 있습니다.
 
-![triton-grafana-dash2](../img/triton-grafana-dash2.png)
+![triton-grafana-dash2](../../img/triton-grafana-dash2.png)
 
 
 ## 결론

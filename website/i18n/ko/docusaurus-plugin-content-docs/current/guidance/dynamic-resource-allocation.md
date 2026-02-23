@@ -115,14 +115,14 @@ import ProgressSteps from '@site/src/components/ProgressSteps';
 
 - **공존 지원** - 동일한 클러스터에서 동시에 실행 가능
 - **DRA가 미래** - NVIDIA와 Kubernetes는 DRA로 독점 전환 중
-- **마이그레이션 전략** - 새로운 워크로드에 DRA, 기존 프로덕션에는 기존 방식 사용
+- **마이그레이션 전략** - 새로운 워크로드에 DRA, 기존 워크로드에는 기존 방식 사용
 
 
 
-### 프로덕션 준비 상태
+### 준비 상태
 
 - **기술 프리뷰** - GPU 할당 및 공유 기능은 NVIDIA에서 활발히 개발 중
-- **프로덕션 준비 완료** - 멀티 노드 [NVLink](https://www.nvidia.com/en-us/data-center/nvlink/)를 위한 ComputeDomains 완전 지원
+- **테스트 및 준비 완료** - 멀티 노드 [NVLink](https://www.nvidia.com/en-us/data-center/nvlink/)를 위한 ComputeDomains 완전 지원
 - **스케줄링 오버헤드** - 클레임 해결 프로세스로 인한 추가 지연 시간
 - **정식 출시** - Kubernetes v1.34 (2025)에서 예상
 - **최신 상태 업데이트** - 현재 개발 진행 상황은 [NVIDIA DRA Driver GitHub](https://github.com/NVIDIA/k8s-dra-driver-gpu) 참조
@@ -170,7 +170,7 @@ Kubernetes는 빠르게 엔터프라이즈 환경에서 AI/ML 워크로드를 �
 
 ### GPU 활용 위기
 
-<Admonition type="warning" title="프로덕션의 심각한 비효율성">
+<Admonition type="warning" title="라이브 환경의 심각한 비효율성">
 
 **높은 수요의 클러스터에서도 GPU 활용률은 종종 40% 미만입니다.** 이는 구성 문제가 아닙니다: Kubernetes가 GPU 리소스를 추상화하는 방식의 근본적인 한계입니다.
 
@@ -408,7 +408,7 @@ DRA를 위한 노드 프로비저닝 방법 선택은 단순히 기술적 호환
 
 그 이유는 다음과 같습니다: 대부분의 대형 GPU 인스턴스([P4d](https://aws.amazon.com/ec2/instance-types/p4/) (A100), [P5](https://aws.amazon.com/ec2/instance-types/p5/) (H100), [B200이 탑재된 P6](https://aws.amazon.com/ec2/instance-types/p6/), [GB200이 탑재된 P6e](https://www.nvidia.com/en-us/data-center/gb200-nvl72/))는 온디맨드 가격이 아닌 AWS Capacity Block Reservations를 통해 주로 사용 가능합니다. **조직이 Capacity Blocks를 구매하면 GPU가 실제로 활용되는지 여부와 관계없이 예약이 만료될 때까지 모든 GPU 시간에 대해 비용을 지불하기로 약속합니다.** 이는 워크로드 수요에 따른 동적 스케일링이라는 Karpenter의 핵심 가치 제안과 근본적인 불일치를 만듭니다. 낮은 수요 기간에 노드를 축소해도 비용이 절약되지 않습니다. 실제로 이미 지불하고 있는 예약된 용량을 낭비하는 것입니다.
 
-또한, **Karpenter는 아직 DRA 스케줄링을 지원하지 않아** ([Issue #1231](https://github.com/kubernetes-sigs/karpenter/issues/1231)에서 활발히 개발 중) 프로덕션 DRA 워크로드와 호환되지 않습니다. Karpenter는 일반 컴퓨팅 워크로드의 동적 스케일링을 통한 비용 최적화에 탁월하지만, **Capacity Block 예약은 ROI를 극대화하기 위해 "상시 가동" 활용 전략이 필요합니다**: 바로 관리형 노드 그룹이 정적 용량 모델로 제공하는 것입니다.
+또한, **Karpenter는 아직 DRA 스케줄링을 지원하지 않아** ([Issue #1231](https://github.com/kubernetes-sigs/karpenter/issues/1231)에서 활발히 개발 중) DRA 워크로드와 호환되지 않습니다. Karpenter는 일반 컴퓨팅 워크로드의 동적 스케일링을 통한 비용 최적화에 탁월하지만, **Capacity Block 예약은 ROI를 극대화하기 위해 "상시 가동" 활용 전략이 필요합니다**: 바로 관리형 노드 그룹이 정적 용량 모델로 제공하는 것입니다.
 
 **미래는 더 낙관적입니다:** Karpenter의 로드맵에는 Capacity Block 시나리오에 적합한 정적 노드 기능이 포함되어 있습니다. 커뮤니티는 [워크로드 없이 수동 노드 프로비저닝](https://github.com/kubernetes-sigs/karpenter/issues/749) 및 [정적 프로비저닝](https://github.com/kubernetes-sigs/karpenter/pull/2309), [수동 노드 프로비저닝](https://github.com/kubernetes-sigs/karpenter/pull/2397)과 같은 RFC를 통한 정적 프로비저닝 기능을 적극적으로 개발하고 있습니다. DRA 지원이 이러한 정적 프로비저닝 기능과 함께 추가되면 Karpenter는 Capacity Block ML 예약 인스턴스와 함께 DRA 워크로드에 선호되는 선택이 될 수 있습니다. 그때까지는 **NVIDIA 드라이버가 사전 설치된 EKS 최적화 AMI를 사용하는 관리형 노드 그룹이 DRA 구현을 위한 가장 신뢰할 수 있는 기반을 제공합니다.**
 
@@ -424,7 +424,7 @@ DRA를 위한 노드 프로비저닝 방법 선택은 단순히 기술적 호환
 - **노드 셀렉터 관리**: 리소스 할당 충돌을 방지하기 위해 노드 셀렉터를 신중하게 구성
 - **기술 프리뷰 상태**: GPU 할당 및 공유 기능은 기술 프리뷰 상태 (업데이트는 [NVIDIA DRA Driver GitHub](https://github.com/NVIDIA/k8s-dra-driver-gpu) 확인)
 
-**마이그레이션 계획의 경우,** 멀티 노드 [NVLink](https://www.nvidia.com/en-us/data-center/nvlink/)를 위한 ComputeDomains와 같은 DRA의 프로덕션 준비 기능으로 시작하고, 핵심 GPU 할당에는 기존 디바이스 플러그인을 유지합니다. DRA의 GPU 할당이 완전히 지원되면 미션 크리티컬한 학습 작업 전에 개발 및 추론 서비스부터 시작하여 점진적으로 워크로드를 마이그레이션합니다. **NVIDIA와 Kubernetes 커뮤니티는 DRA를 디바이스 플러그인의 궁극적인 대체제로 설계했지만**, 전환은 클러스터 안정성을 유지하기 위해 신중한 오케스트레이션이 필요합니다.
+**마이그레이션 계획의 경우,** 멀티 노드 [NVLink](https://www.nvidia.com/en-us/data-center/nvlink/)를 위한 ComputeDomains와 같은 DRA의 기능으로 시작하고, 핵심 GPU 할당에는 기존 디바이스 플러그인을 유지합니다. DRA의 GPU 할당이 완전히 지원되면 미션 크리티컬한 학습 작업 전에 개발 및 추론 서비스부터 시작하여 점진적으로 워크로드를 마이그레이션합니다. **NVIDIA와 Kubernetes 커뮤니티는 DRA를 디바이스 플러그인의 궁극적인 대체제로 설계했지만**, 전환은 클러스터 안정성을 유지하기 위해 신중한 오케스트레이션이 필요합니다.
 
 ### 시각적 비교: 기존 방식 vs DRA
 
@@ -1031,7 +1031,7 @@ kubectl get pods -n mig-gpu -w
 **적합한 사용 사례:**
 - 엄격한 격리가 필요한 멀티 테넌트 환경
 - 예측 가능한 성능 요구 사항
-- 보장된 리소스가 필요한 프로덕션 워크로드
+- 보장된 리소스가 필요한 워크로드
 - 하드웨어 수준 격리가 필요한 규정 준수 시나리오
 
 :::warning MIG 요구 사항
@@ -1050,7 +1050,7 @@ kubectl get pods -n mig-gpu -w
 |---------------|---------------------|-------------|
 | **소규모 추론 작업** | Time-slicing 또는 MPS | 높은 GPU 활용률 |
 | **동시 소규모 모델** | MPS | 진정한 병렬 처리 |
-| **프로덕션 멀티 테넌트** | MIG | 하드웨어 격리 |
+| **멀티 테넌트** | MIG | 하드웨어 격리 |
 | **대규모 모델 학습** | 기본 할당 | 최대 성능 |
 | **개발/테스트** | Time-slicing | 유연성과 단순성 |
 </div>
@@ -1207,7 +1207,7 @@ kubectl logs <workload-pod> -n <namespace> | grep -i gpu
 동적 리소스 할당은 경직된 GPU 할당에서 지능적인 워크로드 인식 리소스 관리로의 근본적인 전환을 나타냅니다. 구조화된 ResourceClaims와 벤더별 드라이버를 활용함으로써 DRA는 엔터프라이즈 규모의 비용 효율적인 AI/ML 운영에 필요한 GPU 활용률을 실현합니다.
 
 :::tip 준비되셨나요? GPU 인프라를 혁신하세요!
-단순화된 JARK 기반 배포 접근 방식을 통해 조직은 세 단계로 프로덕션급 DRA 기능을 구현하여 GPU 인프라를 정적 리소스 풀에서 현대 AI 워크로드에 최적화된 동적이고 지능적인 플랫폼으로 변환할 수 있습니다.
+단순화된 JARK 기반 배포 접근 방식을 통해 조직은 세 단계로 DRA 기능을 구현하여 GPU 인프라를 정적 리소스 풀에서 현대 AI 워크로드에 최적화된 동적이고 지능적인 플랫폼으로 변환할 수 있습니다.
 :::
 
 EKS의 관리형 인프라, NVIDIA의 드라이버 에코시스템 및 Kubernetes의 선언적 모델의 조합은 소규모 추론 작업부터 GB200 수퍼칩에서의 멀티 노드 분산 학습까지 차세대 AI 워크로드를 위한 강력한 기반을 만듭니다.

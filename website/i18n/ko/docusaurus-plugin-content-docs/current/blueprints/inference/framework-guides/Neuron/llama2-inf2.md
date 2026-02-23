@@ -80,7 +80,7 @@ Llama-2 챗봇을 확장하기 위해 회사는 여러 Inferentia2 인스턴스�
 ## 솔루션 아키텍처
 이 섹션에서는 Amazon EKS에서 Llama-2 모델, [Ray Serve](https://docs.ray.io/en/latest/serve/index.html) 및 [Inferentia2](https://aws.amazon.com/ec2/instance-types/inf2/)를 결합한 솔루션의 아키텍처를 자세히 살펴봅니다.
 
-![Llama-2-inf2](../img/llama2-inf2.png)
+![Llama-2-inf2](../../img/llama2-inf2.png)
 
 ## 솔루션 배포
 [Amazon EKS](https://aws.amazon.com/eks/)에 `Llama-2-13b chat`을 배포하려면 필요한 사전 요구 사항을 다루고 배포 프로세스를 단계별로 안내합니다.
@@ -229,7 +229,7 @@ kubectl port-forward service/llama2 8265:8265 -n llama2
 
 이 웹페이지에서 아래 이미지와 같이 모델 배포 진행 상황을 모니터링할 수 있습니다:
 
-![RayDashboard](../img/rayserve-llama2-13b-dashboard.png)
+![RayDashboard](../../img/rayserve-llama2-13b-dashboard.png)
 
 ### 2단계: Llama-2-Chat 모델 테스트
 모델 배포 상태가 `running` 상태가 되면 Llama-2-chat 사용을 시작할 수 있습니다.
@@ -250,7 +250,7 @@ http://localhost:8000/infer?sentence=what is data parallelism and tensor paralle
 
 브라우저에서 다음과 같은 출력을 볼 수 있습니다.
 
-![llama2-13b-response](../img/llama2-13b-response.png)
+![llama2-13b-response](../../img/llama2-13b-response.png)
 
 **NLB 사용**:
 
@@ -264,7 +264,7 @@ http://\<NLB_DNS_NAME\>/serve/infer?sentence=what is data parallelism and tensor
 
 브라우저에서 다음과 같은 출력을 볼 수 있습니다:
 
-![Chat Output](../img/llama-2-chat-ouput.png)
+![Chat Output](../../img/llama-2-chat-ouput.png)
 
 ### 3단계: Gradio WebUI 앱 배포
 
@@ -312,7 +312,7 @@ kubectl port-forward service/gradio-service 7860:7860 -n gradio-llama2-inf2
 
 이제 로컬 머신에서 Gradio 애플리케이션과 상호 작용할 수 있습니다.
 
-![gradio-llama2-13b-chat](../img/gradio-llama2-13b-chat.png)
+![gradio-llama2-13b-chat](../../img/gradio-llama2-13b-chat.png)
 
 ## 결론
 결론적으로, **Llama-2-13b chat** 모델을 Ray Serve와 함께 EKS에 성공적으로 배포하고 Gradio를 사용하여 chatGPT 스타일의 채팅 웹 UI를 생성했습니다.

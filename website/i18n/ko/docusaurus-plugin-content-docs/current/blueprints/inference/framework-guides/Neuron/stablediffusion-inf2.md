@@ -55,7 +55,7 @@ Stable diffusion 이미지 생성기를 확장하기 위해 회사는 여러 Inf
 ## 솔루션 아키텍처
 이 섹션에서는 Amazon EKS에서 Stable diffusion xl 모델, [Ray Serve](https://docs.ray.io/en/latest/serve/index.html) 및 [Inferentia2](https://aws.amazon.com/ec2/instance-types/inf2/)를 결합한 솔루션의 아키텍처를 자세히 살펴봅니다.
 
-![Sdxl-inf2](../img/excali-draw-sdxl-inf2.png)
+![Sdxl-inf2](../../img/excali-draw-sdxl-inf2.png)
 
 ## 솔루션 배포
 [Amazon EKS](https://aws.amazon.com/eks/)에 `stable-diffusion-xl-base-1-0`를 배포하려면 필요한 사전 요구 사항을 다루고 배포 프로세스를 단계별로 안내합니다.
@@ -192,7 +192,7 @@ http://localhost:8265/
 
 이 웹페이지에서 아래 이미지와 같이 모델 배포 진행 상황을 모니터링할 수 있습니다:
 
-![Ray Dashboard](../img/ray-dashboard-sdxl.png)
+![Ray Dashboard](../../img/ray-dashboard-sdxl.png)
 
 ### Stable Diffusion XL 모델 테스트
 
@@ -204,7 +204,7 @@ URL 끝에 쿼리를 추가하여 다음 URL을 사용할 수 있습니다.
 
 브라우저에서 다음과 같은 출력을 볼 수 있습니다:
 
-![Prompt Output](../img/stable-diffusion-xl-prompt_3.png)
+![Prompt Output](../../img/stable-diffusion-xl-prompt_3.png)
 
 ## Gradio WebUI 앱 배포
 배포된 모델과 원활하게 통합되는 사용자 친화적인 채팅 인터페이스를 [Gradio](https://www.gradio.app/)를 사용하여 만드는 방법을 알아봅니다.
@@ -251,7 +251,7 @@ docker run --rm -it \
 
 이제 로컬 머신에서 Gradio 애플리케이션과 상호 작용할 수 있습니다.
 
-![Gradio Output](../img/stable-diffusion-xl-gradio.png)
+![Gradio Output](../../img/stable-diffusion-xl-gradio.png)
 
 ## 결론
 

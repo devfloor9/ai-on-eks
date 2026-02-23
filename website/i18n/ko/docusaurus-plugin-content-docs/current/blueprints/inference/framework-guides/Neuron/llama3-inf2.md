@@ -64,7 +64,7 @@ Llama-3 챗봇을 확장하기 위해 회사는 여러 Inferentia2 인스턴스�
 
 이 섹션에서는 Amazon EKS에서 Llama-3 모델, [Ray Serve](https://docs.ray.io/en/latest/serve/index.html) 및 [Inferentia2](https://aws.amazon.com/ec2/instance-types/inf2/)를 결합한 솔루션의 아키텍처를 자세히 살펴봅니다.
 
-![Llama-3-inf2](../img/llama3.png)
+![Llama-3-inf2](../../img/llama3.png)
 
 ## 솔루션 배포
 
@@ -203,7 +203,7 @@ http://localhost:8265/
 
 이 웹페이지에서 아래 이미지와 같이 모델 배포 진행 상황을 모니터링할 수 있습니다:
 
-![Ray Dashboard](../img/ray-dashboard.png)
+![Ray Dashboard](../../img/ray-dashboard.png)
 
 ### Llama3 모델 테스트
 모델 배포 상태가 `running` 상태가 되면 Llama-3-instruct 사용을 시작할 수 있습니다.
@@ -214,7 +214,7 @@ URL 끝에 쿼리를 추가하여 다음 URL을 사용할 수 있습니다.
 
 브라우저에서 다음과 같은 출력을 볼 수 있습니다:
 
-![Chat Output](../img/llama-2-chat-ouput.png)
+![Chat Output](../../img/llama-2-chat-ouput.png)
 
 ## Gradio WebUI 앱 배포
 배포된 모델과 원활하게 통합되는 사용자 친화적인 채팅 인터페이스를 [Gradio](https://www.gradio.app/)를 사용하여 만드는 방법을 알아봅니다.
@@ -277,7 +277,7 @@ docker run --rm -it \
 
 이제 로컬 머신에서 Gradio 애플리케이션과 상호 작용할 수 있습니다.
 
-![Gradio Llama-3 AI Chat](../img/llama3.png)
+![Gradio Llama-3 AI Chat](../../img/llama3.png)
 
 ## 결론
 

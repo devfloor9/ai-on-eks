@@ -164,16 +164,16 @@ kubectl -n mistral port-forward svc/mistral-service 8265:8265
 
 `http://localhost:8265`를 통해 웹 UI에 액세스합니다. 이 인터페이스는 Ray 에코시스템 내의 작업 및 액터 배포를 표시합니다.
 
-![RayServe Deployment In Progress](../img/ray-dashboard-deploying-mistral-inf2.png)
+![RayServe Deployment In Progress](../../img/ray-dashboard-deploying-mistral-inf2.png)
 
 배포가 완료되면 Controller 및 Proxy 상태가 `HEALTHY`이고 Application 상태가 `RUNNING`이어야 합니다
 
-![RayServe Deployment Completed](../img/ray-dashboard-deployed-mistral-inf2.png)
+![RayServe Deployment Completed](../../img/ray-dashboard-deployed-mistral-inf2.png)
 
 
 Ray 대시보드를 사용하여 Serve 배포 및 리소스 활용도를 포함한 Ray 클러스터 배포를 모니터링할 수 있습니다.
 
-![RayServe Cluster](../img/ray-serve-inf2-mistral-cluster.png)
+![RayServe Cluster](../../img/ray-serve-inf2-mistral-cluster.png)
 
 ## Gradio WebUI 앱 배포
 
@@ -221,7 +221,7 @@ kubectl port-forward service/gradio-service 7860:7860 -n gradio-mistral7b-inf2
 
 이제 로컬 머신에서 Gradio 애플리케이션과 상호 작용할 수 있습니다.
 
-![Gradio WebUI](../img/mistral-gradio.png)
+![Gradio WebUI](../../img/mistral-gradio.png)
 
 #### Mistral 모델과의 상호 작용
 
@@ -229,11 +229,11 @@ kubectl port-forward service/gradio-service 7860:7860 -n gradio-mistral7b-inf2
 
 아래 스크린샷은 다양한 텍스트 프롬프트를 기반으로 한 모델 응답의 몇 가지 예를 제공합니다.
 
-![Gradio QA](../img/mistral-sample-prompt-1.png)
+![Gradio QA](../../img/mistral-sample-prompt-1.png)
 
-![Gradio Convo 1](../img/mistral-conv-1.png)
+![Gradio Convo 1](../../img/mistral-conv-1.png)
 
-![Gradio Convo 2](../img/mistral-conv-2.png)
+![Gradio Convo 2](../../img/mistral-conv-2.png)
 
 ## 정리
 

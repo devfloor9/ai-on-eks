@@ -206,12 +206,12 @@ Enterprise RAG Blueprint는 독립적으로 또는 대규모 시스템의 구성
 
 배포는 [Karpenter](https://karpenter.sh/) 기반 동적 프로비저닝과 함께 Amazon EKS를 사용합니다:
 
-![NVIDIA AI-Q on EKS](../img/nvidia-deep-research-arch.png)
+![NVIDIA AI-Q on EKS](../../img/nvidia-deep-research-arch.png)
 
 
 ### Enterprise RAG Blueprint 아키텍처
 
-![RAG Pipeline with OpenSearch](../img/nvidia-rag-opensearch-arch.png)
+![RAG Pipeline with OpenSearch](../../img/nvidia-rag-opensearch-arch.png)
 
 [RAG 파이프라인](https://github.com/NVIDIA-AI-Blueprints/rag)은 여러 특수 NIM 마이크로서비스를 통해 문서를 처리합니다:
 
