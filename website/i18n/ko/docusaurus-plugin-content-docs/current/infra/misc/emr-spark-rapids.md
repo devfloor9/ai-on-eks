@@ -26,7 +26,7 @@ Amazon EMR과 NVIDIA RAPIDS Accelerator for Apache Spark의 통합 Amazon EMR on
 - NVIDIA는 Spark 작업 간의 데이터 교환을 최적화하도록 설계된 혁신적인 Spark 셔플 구현을 도입했습니다. 이 셔플 시스템은 UCX, RDMA 및 NCCL을 포함한 GPU 강화 통신 라이브러리를 기반으로 구축되어 데이터 전송 속도와 전반적인 성능을 크게 향상시킵니다.
 
 
-<CollapsibleContent header={<h2 id="deploying-the-solution"><span>솔루션 배포</span></h2>}>
+<CollapsibleContent header={<h2><span>솔루션 배포</span></h2>}>
 
 :::warning
 이 블루프린트를 배포하기 전에 GPU 인스턴스 사용과 관련된 비용을 인지하는 것이 중요합니다. 블루프린트는 NVIDIA Spark-RAPIDS 가속기를 사용하여 데이터셋을 훈련하기 위해 8개의 g5.2xlarge GPU 인스턴스를 설정합니다. 그에 따라 이러한 비용을 평가하고 계획하세요.
@@ -50,7 +50,8 @@ Amazon EMR과 NVIDIA RAPIDS Accelerator for Apache Spark의 통합 Amazon EMR on
   - 작업 실행 역할과 EMR 관리 서비스 계정의 ID 간에 신뢰 관계를 생성합니다
   - `emr-ml-team-a` 및 `emr-ml-team-b`에 대한 EMR Virtual Cluster와 두 팀에 대한 IAM 정책을 생성합니다
 
-<h3 id="prerequisites">사전 요구 사항</h3>
+<a id="사전-요구-사항"></a>
+### 사전 요구 사항
 
 머신에 다음 도구가 설치되어 있는지 확인하세요.
 
@@ -58,7 +59,8 @@ Amazon EMR과 NVIDIA RAPIDS Accelerator for Apache Spark의 통합 Amazon EMR on
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 리포지토리 복제
 
@@ -75,7 +77,8 @@ chmod +x install.sh
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 Amazon EKS 클러스터 및 Amazon Managed service for Prometheus 확인
 
@@ -303,7 +306,7 @@ NVIDIA GPU Operator는 메트릭을 Prometheus 서버로 내보내도록 구성�
 
 ```bash
 kubectl port-forward svc/grafana 3000:80 -n grafana
-``
+```
 
 사용자 이름으로 `admin`을 사용하여 Grafana에 로그인하고 다음 AWS CLI 명령을 사용하여 Secrets Manager에서 비밀번호를 검색합니다:
 
@@ -315,7 +318,7 @@ aws secretsmanager get-secret-value --secret-id emr-spark-rapids-grafana --regio
 
 ![Alt text](../img/gpu-dashboard.png)
 
-<CollapsibleContent header={<h2 id="cleanup"><span>정리</span></h2>}>
+<CollapsibleContent header={<h2><span>정리</span></h2>}>
 
 이 스크립트는 `-target` 옵션을 사용하여 모든 리소스가 올바른 순서로 삭제되도록 환경을 정리합니다.
 

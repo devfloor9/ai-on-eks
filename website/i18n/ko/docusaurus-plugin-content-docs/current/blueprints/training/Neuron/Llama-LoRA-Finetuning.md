@@ -29,7 +29,7 @@ AWS Trainium (Trn1) 인스턴스는 고처리량, 저지연 딥러닝을 위해 
 
 ## 1. 솔루션 배포
 
-<CollapsibleContent header={<h2 id="prerequisites"><span>사전 요구사항</span></h2>}>
+<CollapsibleContent header={<h2><span>사전 요구사항</span></h2>}>
 시작하기 전에 필요한 모든 것이 준비되어 있는지 확인하세요:
 - 로컬 Mac/Windows 컴퓨터 또는 Amazon EC2 인스턴스를 사용할 수 있습니다.
 - Docker를 설치하고(최소 100GB 여유 공간) Docker 이미지가 x86 아키텍처를 사용하는지 확인하세요.
@@ -67,7 +67,8 @@ cd ai-on-eks/infra/trainium-inferentia
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 이전에 선택한 리전을 사용하여 EKS 클러스터가 실행 중인지 확인합니다:
 

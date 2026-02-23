@@ -69,7 +69,7 @@ Llama-2는 GPU에서 고성능 추론을 달성할 수 있지만, Neuron 가속�
 
 참고: 이 게시물은 Meta의 Llama 토크나이저를 사용하며, 토크나이저 파일을 다운로드하기 전에 수락해야 하는 사용자 라이선스로 보호됩니다. 여기에서 접근 권한을 요청하여 Llama 파일에 대한 접근 권한이 있는지 확인하세요.
 
-<CollapsibleContent header={<h2 id="prerequisites"><span>사전 요구사항</span></h2>}>
+<CollapsibleContent header={<h2><span>사전 요구사항</span></h2>}>
 시작하기 전에 배포 프로세스를 원활하고 번거롭지 않게 만들기 위해 모든 사전 요구사항이 준비되어 있는지 확인하세요.
 EC2 또는 Cloud9 인스턴스에 다음 도구가 설치되어 있는지 확인하세요.
 
@@ -114,7 +114,8 @@ export TF_VAR_trn1_32xl_desired_size=4
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 Amazon EKS 클러스터 확인
 

@@ -69,7 +69,8 @@ Stable diffusion 이미지 생성기를 확장하기 위해 회사는 여러 Inf
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 저장소 클론
 
@@ -88,7 +89,8 @@ cd ai-on-eks/infra/trainium-inferentia/
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 Amazon EKS 클러스터 확인
 

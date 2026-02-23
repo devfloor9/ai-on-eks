@@ -100,7 +100,8 @@ Meta-llama/Llama-2-7b-chat-hf는 Meta에서 개발한 고급 대화형 AI 모델
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 저장소 복제
 
@@ -133,7 +134,8 @@ cd ai-on-eks/infra/nvidia-triton-server/ && chmod +x install.sh
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 **5단계**: 설치가 완료되면 Amazon EKS 클러스터를 확인합니다
 
@@ -288,7 +290,7 @@ vLLM 활성화된 Triton 모델의 경우 model_repository는 `ai/inference/vllm
 - max_batch_size - `max_batch_size` 값은 Triton이 활용할 수 있는 배칭 유형에 대해 모델이 지원하는 최대 배치 크기를 나타냅니다
 - Inputs and Outputs - 각 모델 입력 및 출력은 이름, 데이터 유형, 모양을 지정해야 합니다. 입력 모양은 모델과 추론 요청에서 Triton이 예상하는 입력 텐서의 모양을 나타냅니다. 출력 모양은 모델이 생성하고 추론 요청에 대한 응답으로 Triton이 반환하는 출력 텐서의 모양을 나타냅니다. 입력 및 출력 모양은 `max_batch_size`와 `input dims` 또는 `output dims`로 지정된 차원의 조합으로 지정됩니다.
 
-<h3 id="verify-the-deployment">배포 확인</h3>
+### 배포 확인
 
 Triton Inference Server가 성공적으로 배포되었는지 확인하려면 다음 명령을 실행하세요:
 

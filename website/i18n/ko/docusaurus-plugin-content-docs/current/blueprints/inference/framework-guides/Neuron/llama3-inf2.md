@@ -68,7 +68,7 @@ Llama-3 챗봇을 확장하기 위해 회사는 여러 Inferentia2 인스턴스�
 
 ## 솔루션 배포
 
-[Amazon EKS](https://aws.amazon.com/eks/)에 `Llama-4-8b-instruct`를 배포하려면 필요한 사전 요구 사항을 다루고 배포 프로세스를 단계별로 안내합니다.
+[Amazon EKS](https://aws.amazon.com/eks/)에 `Llama-3-8b-instruct`를 배포하려면 필요한 사전 요구 사항을 다루고 배포 프로세스를 단계별로 안내합니다.
 
 여기에는 인프라 설정, **Ray 클러스터** 배포 및 [Gradio](https://www.gradio.app/) WebUI 앱 생성이 포함됩니다.
 
@@ -80,7 +80,8 @@ Llama-3 챗봇을 확장하기 위해 회사는 여러 Inferentia2 인스턴스�
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 저장소 클론
 
@@ -99,7 +100,8 @@ cd ai-on-eks/infra/trainium-inferentia/
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 Amazon EKS 클러스터 확인
 
@@ -231,13 +233,13 @@ Gradio 앱은 데모 목적으로만 생성된 로컬로 노출된 서비스와 
 먼저 kubectl을 사용하여 Llama-3 Ray 서비스로 포트 포워딩을 실행합니다:
 
 ```bash
-kubectl port-forward svc/llama2-service 8000:8000 -n llama3
+kubectl port-forward svc/llama3-service 8000:8000 -n llama3
 ```
 
 ## Gradio WebUI 앱 배포
 배포된 모델과 원활하게 통합되는 사용자 친화적인 채팅 인터페이스를 [Gradio](https://www.gradio.app/)를 사용하여 만드는 방법을 알아봅니다.
 
-localhost에서 Docker 컨테이너로 실행되는 Gradio 앱을 설정하는 것으로 진행합니다. 이 설정을 통해 RayServe를 사용하여 배포된 Stable Diffusion XL 모델과 상호 작용할 수 있습니다.
+localhost에서 Docker 컨테이너로 실행되는 Gradio 앱을 설정하는 것으로 진행합니다. 이 설정을 통해 RayServe를 사용하여 배포된 Llama-3-Instruct 모델과 상호 작용할 수 있습니다.
 
 ### Gradio 앱 Docker 컨테이너 빌드
 

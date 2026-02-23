@@ -67,14 +67,15 @@ Kubernetes에서 Ray를 배포하면 다음과 같은 여러 이점을 얻을 �
 
 *출처: https://docs.ray.io/en/latest/cluster/kubernetes/index.html*
 
-<CollapsibleContent header={<h2 id="deploying-the-solution"><span>솔루션 배포</span></h2>}>
+<CollapsibleContent header={<h2><span>솔루션 배포</span></h2>}>
 
 이 [예제](https://github.com/awslabs/ai-on-eks/tree/main/infra/jark-stack/terraform)에서는 Amazon EKS에 JARK 클러스터를 프로비저닝합니다.
 
 ![JARK](../img/jark-stack.png)
 
 
-<h3 id="prerequisites">사전 요구 사항</h3>
+<a id="사전-요구-사항"></a>
+### 사전 요구 사항
 
 머신에 다음 도구가 설치되어 있는지 확인하세요.
 
@@ -82,7 +83,8 @@ Kubernetes에서 Ray를 배포하면 다음과 같은 여러 이점을 얻을 �
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 **1. 리포지토리 복제:**
 
@@ -110,7 +112,7 @@ cd ai-on-eks/infra/jark-stack && chmod +x install.sh
 
 </CollapsibleContent>
 
-<CollapsibleContent header={<h3 id="verify-deployment"><span>배포 확인</span></h3>}>
+<CollapsibleContent header={<h3><span>배포 확인</span></h3>}>
 
 Kubernetes 클러스터에 액세스할 수 있도록 로컬 kubeconfig를 업데이트합니다
 
@@ -180,7 +182,7 @@ EKS에서 AI 모델을 배포하려면 [AI](https://awslabs.github.io/ai-on-eks/
 
 </CollapsibleContent>
 
-<CollapsibleContent header={<h3 id="clean-up"><span>정리</span></h3>}>
+<CollapsibleContent header={<h3><span>정리</span></h3>}>
 
 :::caution
 AWS 계정에 원치 않는 요금이 청구되지 않도록 이 배포 중에 생성된 모든 AWS 리소스를 삭제하세요.

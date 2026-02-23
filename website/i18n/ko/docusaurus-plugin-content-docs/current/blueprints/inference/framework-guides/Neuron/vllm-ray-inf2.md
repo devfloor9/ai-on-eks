@@ -81,7 +81,8 @@ Llama-3는 GPU에서 고성능 추론을 달성할 수 있지만, Neuron 가속�
 2. [kubectl](https://Kubernetes.io/docs/tasks/tools/)
 3. [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 저장소 클론:
 
@@ -100,7 +101,8 @@ cd ai-on-eks/infra/trainium-inferentia/
 ./install.sh
 ```
 
-<h3 id="verify-the-resources">리소스 확인</h3>
+<a id="리소스-확인"></a>
+### 리소스 확인
 
 Amazon EKS 클러스터 확인
 
@@ -127,7 +129,8 @@ inferentia-inf2   inferentia-inf2
 trainium-trn1     trainium-trn1
 ```
 
-<h3 id="verify-neuron-plugin">Neuron 플러그인 확인</h3>
+<a id="neuron-플러그인-확인"></a>
+### Neuron 플러그인 확인
 
 Neuron device plugin은 Neuron 코어 및 디바이스를 리소스로 kubernetes에 노출합니다. 블루프린트에 의해 설치된 플러그인의 상태를 확인합니다.
 
@@ -139,7 +142,8 @@ NAME                   DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE
 neuron-device-plugin   1         1         1       1            1           <none>          15d
 ```
 
-<h3 id="verify-neuron-scheduler">Neuron 스케줄러 확인</h3>
+<a id="neuron-스케줄러-확인"></a>
+### Neuron 스케줄러 확인
 
 Neuron 스케줄러 확장은 둘 이상의 Neuron 코어 또는 디바이스 리소스가 필요한 Pod를 스케줄링하는 데 필요합니다. 블루프린트에 의해 설치된 스케줄러의 상태를 확인합니다.
 

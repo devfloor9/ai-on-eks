@@ -18,7 +18,7 @@ EKS의 기능을 활용하면 사용자의 요구에 맞게 JupyterHub 환경을
 
 EKS에서 JupyterHub를 시작하려면 이 가이드의 지침에 따라 JupyterHub 환경을 설정하고 구성하세요.
 
-<CollapsibleContent header={<h3 id="deploying-the-solution"><span>솔루션 배포</span></h3>}>
+<CollapsibleContent header={<h3><span>솔루션 배포</span></h3>}>
 
 이 [블루프린트](https://github.com/awslabs/ai-on-eks/tree/main/infra/jupyterhub)는 다음 구성 요소를 배포합니다:
 
@@ -31,7 +31,7 @@ EKS에서 JupyterHub를 시작하려면 이 가이드의 지침에 따라 Jupyte
 
 이 블루프린트를 따르면 다양한 AWS 서비스를 활용하여 사용자를 위한 협업적이고 확장 가능한 플랫폼을 제공하는 EKS에서 JupyterHub 환경을 쉽게 배포하고 구성할 수 있습니다.
 
-<CollapsibleContent header={<h3 id="pre-requisites"><span>사전 요구 사항</span></h3>}>
+<CollapsibleContent header={<h3><span>사전 요구 사항</span></h3>}>
 
 **유형 1: 도메인 이름과 로드 밸런서 없이 JupyterHub 배포**:
 
@@ -83,7 +83,8 @@ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certifi
 
 이 블루프린트는 `dummy`, `cognito`, `oauth`의 세 가지 인증 메커니즘을 지원합니다. 이 게시물에서는 쉬운 시연을 위해 dummy 메커니즘을 사용하며 프로덕션에 권장되는 인증 메커니즘이 아닙니다. 프로덕션 준비 설정에는 Authenticators 페이지에서 찾을 수 있는 cognito 방법 또는 기타 지원되는 인증 메커니즘을 사용하는 것을 강력히 권장합니다.
 
-<h3 id="deploy">배포</h3>
+<a id="배포"></a>
+### 배포
 
 **유형 1 배포 구성 변경:**
 
@@ -129,7 +130,7 @@ cd ai-on-eks/infra/jupyterhub && chmod +x install.sh
 </CollapsibleContent>
 
 
-<CollapsibleContent header={<h3 id="verify-the-resources"><span>리소스 확인</span></h3>}>
+<CollapsibleContent header={<h3><span>리소스 확인</span></h3>}>
 
 먼저 새로 생성된 Amazon EKS 클러스터에 연결하도록 kubeconfig를 구성해야 합니다. 다음 명령을 사용하고 필요한 경우 `us-west-2`를 특정 AWS 리전으로 바꾸세요:
 
@@ -296,7 +297,7 @@ Keycloak 가입 및 로그인 프로세스를 따라 로그인합니다.
 ![](../img/jupyter_launcher.png)
 
 
-<CollapsibleContent header={<h3 id="cleanup"><span>정리</span></h3>}>
+<CollapsibleContent header={<h3><span>정리</span></h3>}>
 
 :::caution
 AWS 계정에 원치 않는 요금이 청구되지 않도록 이 배포 중에 생성된 모든 AWS 리소스를 삭제하세요.
