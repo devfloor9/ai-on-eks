@@ -36,7 +36,7 @@ Deploying MoE models requires loading all expert weights into GPU memory, even t
 
 **Maverick on GPU requires FP8 quantization.** The BF16 model weights (~800 GiB) exceed the p5.48xlarge total GPU memory (640 GiB). Use the FP8-quantized variant (`meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`) which fits within 640 GiB.
 
-For running Maverick without quantization, consider [Trainium2 deployment](/docs/blueprints/inference/Neuron/llama4-trn2) which provides 1.5 TiB HBM memory.
+For running Maverick without quantization, consider [Trainium2 deployment](/docs/blueprints/inference/framework-guides/Neuron/llama4-trn2) which provides 1.5 TiB HBM memory.
 
 :::
 
