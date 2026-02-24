@@ -156,7 +156,7 @@ llama3-8B-Instruct 모델을 배포하려면 Hugging Face Hub 토큰을 환경 �
 
 
 ```bash
-# Hugging Face Hub 토큰을 환경 변수로 설정합니다. 이 변수는 ray-service-mistral.yaml 파일을 적용할 때 대체됩니다
+# Hugging Face Hub 토큰을 환경 변수로 설정합니다. 이 변수는 ray-service-llama3.yaml 파일을 적용할 때 대체됩니다
 
 export  HUGGING_FACE_HUB_TOKEN=<Your-Hugging-Face-Hub-Token-Value>
 
