@@ -7,10 +7,10 @@ locals {
 
   # AMP overlay values (only when AMP is enabled)
   kube_prometheus_amp_values = var.enable_amazon_prometheus ? templatefile("${path.module}/helm-values/kube-prometheus-amp-enable.yaml", {
-    region              = local.region
-    amp_sa              = local.amp_ingest_service_account
-    amp_remotewrite_url = "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}/api/v1/remote_write"
-    amp_url             = "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}"
+    region               = local.region
+    amp_sa               = local.amp_ingest_service_account
+    amp_remotewrite_url  = "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}/api/v1/remote_write"
+    amp_url              = "https://aps-workspaces.${local.region}.amazonaws.com/workspaces/${aws_prometheus_workspace.amp[0].id}"
     grafana_service_port = var.grafana_service_port
   }) : ""
 
