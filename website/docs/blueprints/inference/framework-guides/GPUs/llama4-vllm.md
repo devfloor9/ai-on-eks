@@ -42,7 +42,7 @@ For running Maverick without quantization, consider [Trainium2 deployment](/docs
 
 <CollapsibleContent header={<h2><span>Deploying the Inference-Ready EKS Cluster</span></h2>}>
 
-This guide assumes you have an existing EKS cluster with GPU support. We recommend using the [Inference-Ready EKS Cluster](/docs/infra/inference/inference-ready-cluster) which comes pre-configured with all necessary components.
+This guide assumes you have an existing EKS cluster with GPU support. We recommend using the [Inference-Ready EKS Cluster](/docs/infra/inference/inference-ready-cluster) which comes pre-configured with EKS Auto Mode and GPU NodePool.
 
 ### Prerequisites
 
@@ -57,7 +57,7 @@ git clone https://github.com/awslabs/ai-on-eks.git
 cd ai-on-eks/infra/solutions/inference-ready-cluster
 ```
 
-Update the region in `terraform/blueprint.tfvars`, then run:
+Ensure `enable_eks_auto_mode = true` in `terraform/blueprint.tfvars`, then run:
 
 ```bash
 ./install.sh
@@ -69,9 +69,13 @@ Update the region in `terraform/blueprint.tfvars`, then run:
 aws eks --region <REGION> update-kubeconfig --name inference-cluster
 ```
 
-### Verify Resources
+### Verify EKS Auto Mode Resources
 
 ```bash
+# Verify NodePools (gpu, neuron, general-purpose, system)
+kubectl get nodepools
+
+# Verify nodes (GPU nodes are provisioned on-demand when workloads are scheduled)
 kubectl get nodes
 ```
 
