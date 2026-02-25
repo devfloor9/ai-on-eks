@@ -205,7 +205,7 @@ kubectl create secret generic hf-token --from-literal=token=<your-huggingface-to
 
 ### Step 2: Deploy with Helm
 
-For **trn1.32xlarge** (Scout):
+For **trn2.48xlarge** (Scout):
 
 ```bash
 helm repo add ai-on-eks https://awslabs.github.io/ai-on-eks-charts/
@@ -222,7 +222,7 @@ Key deployment parameters:
 - **Docker image**: AWS Neuron DLC from private ECR (`763104351884.dkr.ecr.<region>.amazonaws.com/huggingface-vllm-inference-neuronx`)
 - **Neuron device requests**: `aws.amazon.com/neuron: 16` for all 16 chips
 - **CPU memory**: `384Gi` minimum (weight sharding requires loading the full model into CPU memory)
-- **Instance type**: `trn1.32xlarge` for Scout, `trn2.48xlarge` for Maverick
+- **Instance type**: `trn2.48xlarge` (default for both Scout and Maverick)
 - **Environment variable**: `VLLM_NEURON_FRAMEWORK=optimum` is required for on-the-fly Neuron compilation
 
 :::
