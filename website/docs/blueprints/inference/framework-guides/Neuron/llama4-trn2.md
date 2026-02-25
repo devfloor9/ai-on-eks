@@ -31,7 +31,7 @@ AWS Trainium provides large HBM memory capacity, making it an excellent choice f
 | Instance | Chips | NeuronCores | HBM Memory | Karpenter | EKS Auto Mode |
 |----------|-------|-------------|------------|-----------|---------------|
 | trn1.32xlarge | 16 Trainium v1 | 32 | 512 GiB | Supported | Supported |
-| trn2.48xlarge | 16 Trainium v2 | 32 | 1.5 TiB | Supported | Not yet supported |
+| trn2.48xlarge | 16 Trainium v2 | 64 | 1.5 TiB | Supported | Not yet supported |
 
 | Advantage | Detail |
 |-----------|--------|
@@ -189,7 +189,7 @@ When a Trainium node is provisioned, the device plugin exposes the following ext
 | Resource | Description | trn1.32xlarge | trn2.48xlarge |
 |----------|-------------|---------------|---------------|
 | `aws.amazon.com/neuron` | Neuron devices (chips) | 16 | 16 |
-| `aws.amazon.com/neuroncore` | NeuronCores | 32 | 32 |
+| `aws.amazon.com/neuroncore` | NeuronCores (2 per v1 chip, 4 per v2 chip) | 32 | 64 |
 
 Use `aws.amazon.com/neuron` in pod resource requests to allocate Neuron devices.
 
@@ -221,7 +221,9 @@ Key deployment parameters:
 - **tensor_parallel_size: 16** (one per Trainium chip, not per NeuronCore)
 - **Docker image**: AWS Neuron DLC from private ECR (`763104351884.dkr.ecr.<region>.amazonaws.com/huggingface-vllm-inference-neuronx`)
 - **Neuron device requests**: `aws.amazon.com/neuron: 16` for all 16 chips
+- **CPU memory**: `384Gi` minimum (weight sharding requires loading the full model into CPU memory)
 - **Instance type**: `trn1.32xlarge` for Scout, `trn2.48xlarge` for Maverick
+- **Environment variable**: `VLLM_NEURON_FRAMEWORK=optimum` is required for on-the-fly Neuron compilation
 
 :::
 
@@ -243,6 +245,12 @@ During deployment, the pod will go through these stages:
 3. **Running** - Neuron model compilation (30-60+ minutes on first run)
 4. **Ready** - vLLM server is serving requests
 
+:::warning[CPU Memory Requirements]
+
+The pod requires **at least 384 GiB of CPU memory** for model weight sharding across 16 Neuron devices. With insufficient memory (e.g., 64 GiB), the pod will be OOMKilled during weight loading. The trn2.48xlarge instance provides ~2 TiB of system memory, so this is well within capacity.
+
+:::
+
 :::warning
 
 The first deployment takes significantly longer due to Neuron model compilation. Subsequent deployments with the same configuration will use cached artifacts. Monitor the compilation progress in the logs:
@@ -253,9 +261,22 @@ kubectl logs -f -l app.kubernetes.io/instance=llama4-scout-neuron
 
 :::
 
+**Tested deployment timeline on trn2.48xlarge (Scout):**
+
+| Phase | Duration | Description |
+|-------|----------|-------------|
+| Node provisioning | ~5 min | Karpenter provisions trn2.48xlarge |
+| Image pull | ~30 sec | DLC image (~2.9 GiB, cached after first pull) |
+| HLO generation | ~60 sec | Generates HLOs for context_encoding and token_generation |
+| Neuron compilation | ~200 sec | neuronx-cc compiles HLOs to NEFFs (target=trn2) |
+| Model build | ~650 sec | Weight layout transformation |
+| Weight loading | ~5 min | Download, shard, and load weights to 16 Neuron devices |
+| **Total (first deploy)** | **~20 min** | Subsequent deploys reuse cached compilation artifacts |
+
 Once complete, the vLLM server will start:
 
 ```
+INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000
 ```
 
@@ -330,7 +351,18 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 [Open WebUI](https://github.com/open-webui/open-webui) provides a ChatGPT-style interface for interacting with the model.
 
-The inference-ready cluster includes Open WebUI. To access it:
+```bash
+helm repo add open-webui https://helm.openwebui.com/
+helm repo update
+
+helm install open-webui open-webui/open-webui \
+  --namespace open-webui --create-namespace \
+  --set ollama.enabled=false \
+  --set env.OPENAI_API_BASE_URL=http://llama4-scout-neuron.default.svc.cluster.local:8000/v1 \
+  --set env.OPENAI_API_KEY=dummy
+```
+
+Access the UI:
 
 ```bash
 kubectl port-forward svc/open-webui 8080:80 -n open-webui
